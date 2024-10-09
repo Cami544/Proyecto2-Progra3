@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="angus-activation-1.0.03">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/angus-activation-1.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.activation-api-2.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.xml.bind-api-4.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jaxb-core-4.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jaxb-impl-4.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcommon-1.0.23.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jfreechart-1.0.19.jar!/" />
+      <root url="file://$PROJECT_DIR$" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/src/main/java" />
+    </SOURCES>
+  </library>
+</component>

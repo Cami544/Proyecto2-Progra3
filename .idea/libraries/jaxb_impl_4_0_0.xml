@@ -1,0 +1,33 @@
+<component name="libraryTable">
+  <library name="jaxb-impl-4.0.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jaxb-impl-4.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-imaging-1.0-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-io-2.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.activation-api-2.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jaxb-core-4.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/itextpdf-5.5.13.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/itextpdf-5.5.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-8.0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/bouncy-castle-connector-8.0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/io-8.0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/angus-activation-1.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/itext-xtra-5.5.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.xml.bind-api-4.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/itextpdf-5.5.13.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/itext-xtra-5.5.13.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcommon-1.0.23.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jfreechart-1.0.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kernel-8.0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/layout-8.0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.7.36.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-2.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-simple-2.0.0.jar!/" />
+      <root url="file://$PROJECT_DIR$" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/src/main/java" />
+    </SOURCES>
+  </library>
+</component>
