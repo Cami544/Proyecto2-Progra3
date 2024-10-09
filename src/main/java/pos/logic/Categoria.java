@@ -1,34 +1,34 @@
 package pos.logic;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlID;
-import jakarta.xml.bind.annotation.XmlElement;
-
 import java.util.Objects;
-
-@XmlAccessorType(XmlAccessType.FIELD)
+//sin xml
 public class Categoria {
-
-    @XmlID
-    String codigo;
-    @XmlElement
+    String id;
     String nombre;
 
     public Categoria() {
         this("", "");
     }
-    public Categoria(String codigo, String nombreCat) {
-        this.codigo = codigo;
+
+    public Categoria(String id, String nombreCat) {
+        this.id = id;
         this.nombre = nombreCat;
     }
 
     public String getIdCategoria() {
-        return codigo;
+        return id;
     }
 
     public String getNombreCategoria() {
         return nombre;
+    }
+
+    public void setIdCategoria(String id) {
+        this.id = id;
+    }
+
+    public void setNombreCategoria(String nombre) {
+        this.nombre = nombre;
     }
 
     @Override
@@ -48,5 +48,4 @@ public class Categoria {
     public int hashCode() {
         return Objects.hash(nombre);
     }
-
 }

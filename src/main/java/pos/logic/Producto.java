@@ -1,24 +1,20 @@
 package pos.logic;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlID;
-import jakarta.xml.bind.annotation.XmlIDREF;
 import java.util.Objects;
-
-@XmlAccessorType(XmlAccessType.FIELD)
+//sin xml
 public class Producto {
-    @XmlID
     String id;
     String nombre;
     String descripcion;
     String unidadMedida;
     double precio;
     int existencias;
-    @XmlIDREF
     Categoria categoria;
 
-    public Producto(){this("","","",0,0,"",null);}
+    public Producto() {
+        this("", "", "", 0, 0, "", null);
+    }
+
     public Producto(String id, String nombre, String descripcion, int existencias, double precio, String unidadMedida, Categoria categoria) {
         this.id = id;
         this.nombre = nombre;
@@ -85,7 +81,6 @@ public class Producto {
         this.categoria = categoria;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -98,9 +93,9 @@ public class Producto {
     public String toString() {
         return nombre;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }

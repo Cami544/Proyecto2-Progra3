@@ -1,19 +1,13 @@
 package pos.logic;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlID;
-
 import java.util.Objects;
-
-@XmlAccessorType(XmlAccessType.FIELD)
+//Sin xml
 public class Cajero {
-    @XmlID
     String id;
     String nombre;
 
-
-    public Cajero() {this("","");
+    public Cajero() {
+        this("", "");
     }
 
     public Cajero(String id, String nombre) {
@@ -49,12 +43,9 @@ public class Cajero {
     public int hashCode() {
         return Objects.hash(id);
     }
+
     @Override
     public String toString() {
         return nombre;
-
     }
-
-
-
 }

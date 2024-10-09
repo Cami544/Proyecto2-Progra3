@@ -1,15 +1,8 @@
 package pos.logic;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlID;
-
-
 import java.util.Objects;
-
-@XmlAccessorType(XmlAccessType.FIELD)
+//sin xml
 public class Cliente {
-    @XmlID
     String id;
     String nombre;
     String telefono;
@@ -17,7 +10,7 @@ public class Cliente {
     float descuento;
 
     public Cliente() {
-        this("","","","",0);
+        this("", "", "", "", 0);
     }
 
     public Cliente(String id, String nombre, String telefono, String email, float descuento) {
@@ -27,9 +20,11 @@ public class Cliente {
         this.email = email;
         this.descuento = descuento;
     }
+
     public Cliente(String nombre) {
         this.nombre = nombre;
     }
+
     public String getId() {
         return id;
     }

@@ -19,12 +19,12 @@ public class XmlPersister {
         if (theInstance==null) theInstance=new XmlPersister("pos.xml");
         return theInstance;
     }
-
     public XmlPersister(String p) {
        path=p;
     }
 
     public Data load() throws Exception{
+
         JAXBContext jaxbContext = JAXBContext.newInstance(Data.class);
         FileInputStream is = new FileInputStream(path);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();

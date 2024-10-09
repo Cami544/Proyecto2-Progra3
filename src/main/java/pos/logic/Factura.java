@@ -1,53 +1,39 @@
 package pos.logic;
 
-import jakarta.xml.bind.annotation.*;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import pos.data.LocalDateAdapter;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+//sin xml
 
-@XmlAccessorType(XmlAccessType.FIELD)
-public  class Factura   {
-    @XmlID
-    String numero;
-    @XmlIDREF
-            Cliente cliente;
-    @XmlIDREF
-            Cajero cajero;
-    @XmlJavaTypeAdapter(value= LocalDateAdapter.class)
+public class Factura {
+    int numero;  // Asignado por la base de datos
+    Cliente cliente;
+    Cajero cajero;
     LocalDate fecha;
-    @XmlIDREF
-    @XmlElementWrapper(name="Lineas")
-    @XmlElement(name="Linea")
-    List<Linea> lineas; //productos
-
+    List<Linea> lineas; // productos
 
     public Factura() {
-        this. numero=generateFacturaNumber();
-        this.cliente=null;
-        this.cajero=null;
-        this.fecha=null;
+        this.numero = 0;  // el número será asignado automáticamente por la base de datos
+        this.cliente = null;
+        this.cajero = null;
+        this.fecha = null;
         this.lineas = new ArrayList<>();
     }
 
-
     public Factura(Cliente cliente, Cajero cajero, LocalDate fecha, List<Linea> lineas) {
-        this.numero = generateFacturaNumber() ;
+        this.numero = 0;  // el número será asignado automáticamente por la base de datos
         this.cliente = cliente;
         this.cajero = cajero;
         this.fecha = fecha;
         this.lineas = lineas;
     }
 
-
-    public String getNumero() {
+    public int getNumero() {
         return numero;
     }
 
-    public void setNumero(String numero) {
+    public void setNumero(int numero) {
         this.numero = numero;
     }
 
@@ -115,24 +101,21 @@ public  class Factura   {
         return descuentos;
     }
 
-    public String generateFacturaNumber() {
-        String facturaNumber = "FAC-";
-        return (facturaNumber+((int) (Math.random() * 100000)));
-    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Factura factura = (Factura) o;
-        return Objects.equals(numero, factura.numero);
+        return numero == factura.numero;
     }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(numero);
+    }
 
     @Override
     public String toString() {
-        return numero;
+        return String.valueOf(numero);
     }
 }

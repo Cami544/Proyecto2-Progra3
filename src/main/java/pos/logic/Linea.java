@@ -1,28 +1,20 @@
 package pos.logic;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlID;
-import jakarta.xml.bind.annotation.XmlIDREF;
-
 import java.util.Objects;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+//Sin lo del xml
 public class Linea {
-    @XmlID
-    String numero;
-    @XmlIDREF
+    int numero;
     Producto producto;
-    @XmlIDREF
     Factura factura;
     int cantidad;
     float descuento;
 
     public Linea() {
-        this("",null,null,1,0);
+        this(0, null, null, 1, 0);
     }
 
-    public Linea(String numero, Producto producto, Factura factura, int cantidad, float descuento) {
+    public Linea(int numero, Producto producto, Factura factura, int cantidad, float descuento) {
         this.numero = numero;
         this.producto = producto;
         this.factura = factura;
@@ -39,15 +31,15 @@ public class Linea {
 
     public float getTotal() {
         double neto = getNeto();
-        double total= neto - (neto * (descuento/100));
+        double total = neto - (neto * (descuento / 100));
         return Math.round(total);
     }
 
-    public String getNumero() {
+    public int getNumero() {
         return numero;
     }
 
-    public void setNumero(String numero) {
+    public void setNumero(int numero) {
         this.numero = numero;
     }
 
@@ -88,7 +80,7 @@ public class Linea {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Linea linea = (Linea) o;
-        return Objects.equals(numero, linea.numero);
+        return numero == linea.numero;
     }
 
     @Override
@@ -98,6 +90,6 @@ public class Linea {
 
     @Override
     public String toString() {
-        return numero;
+        return String.valueOf(numero);
     }
 }

@@ -10,6 +10,7 @@ import java.util.List;
 public class Controller {
     View view;
     Model model;
+    //1
     public Controller(View view, Model model) {
         this.view = view;
         this.model = model;
@@ -27,14 +28,14 @@ public class Controller {
         view.updateClientesComboBox(clientes);
         view.updateCajerosComboBox(cajeros);
     }
-
+    //2
     public void search(Factura filter) throws Exception {
         model.setFilter(filter);
         model.setMode(Application.MODE_CREATE);
         model.setCurrent(new Factura());
         model.setList(Service.instance().search(model.getFilter()));
     }
-
+    //3
     public void save(Factura e) throws Exception {
         switch (model.getMode()) {
             case Application.MODE_CREATE:
@@ -47,7 +48,7 @@ public class Controller {
         model.setFilter(new Factura());
         search(model.getFilter());
     }
-
+    //4
     public void save(Linea e) throws Exception {
         switch (model.getMode()) {
             case Application.MODE_CREATE:
@@ -60,7 +61,7 @@ public class Controller {
         model.setFilter(new Factura());
         search(model.getFilter());
     }
-
+    //5
     public void edit(int row) {
         if (row >= 0 && row < model.getList().size()) {
             Factura e = model.getList().get(row);
@@ -74,17 +75,17 @@ public class Controller {
             JOptionPane.showMessageDialog(view.getPanel(), "Invalid row selected.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    //6
     public void delete() throws Exception {
         Service.instance().delete(model.getCurrent());
         search(model.getFilter());
     }
-
+    //7
     public void clear() {
         model.getCurrent().getLineas().clear();
         model.updateModel();
     }
-
+    //8
     public void buscarProductoPorId(String productId) throws Exception {
         if (productId != null && !productId.trim().isEmpty()) {
             try {
@@ -134,7 +135,7 @@ public class Controller {
             JOptionPane.showMessageDialog(view.getPanel(), "El ID del producto no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    //9
     public List<Producto> buscarProductos(String buscar) {
         List<Producto> productos = Service.instance().getAllProductos();
         List<Producto> resultado = new ArrayList<>();
@@ -145,12 +146,12 @@ public class Controller {
         }
         return resultado;
     }
-
+    //10
     public void addLineaToTable(Linea linea) {
         TableModel model = (TableModel) view.getListLineas().getModel();
         model.addLinea(linea);
     }
-
+    //11
     public void searchProducto() {
         String productId = view.getSearchProductoText();
         if (productId != null && !productId.trim().isEmpty()) {
@@ -163,7 +164,7 @@ public class Controller {
             JOptionPane.showMessageDialog(view.getPanel(), "Por favor, ingrese un ID de producto.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    //12
     public void actualizarExistenciasFactura(Factura factura) throws Exception {
         for (Linea linea : factura.getLineas()) {
             Producto producto = linea.getProducto();
@@ -179,7 +180,7 @@ public class Controller {
             }
         }
     }
-
+    //13
     public void actualizarTotales() {
 
         view.getArticulos().setText(String.valueOf(model.getCurrent().getCantidadTotal()));

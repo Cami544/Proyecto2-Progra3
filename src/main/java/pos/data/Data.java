@@ -9,6 +9,8 @@ import java.util.List;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Data {
+     private int facturasConsecutivo =1;
+     private int lineasConsecutivo =1;
 
     @XmlElementWrapper(name = "clientes")
     @XmlElement(name = "cliente")
@@ -18,54 +20,46 @@ public class Data {
     @XmlElement(name = "cajero")
     private List<Cajero> cajeros;
 
-    @XmlElementWrapper(name = "categorias")
-    @XmlElement(name = "categoria")
-    private List<Categoria> categorias;
-
     @XmlElementWrapper(name = "productos")
     @XmlElement(name = "producto")
     private List<Producto> productos;
 
-    @XmlElementWrapper(name = "facturas")
+    @XmlElementWrapper(name = "categorias")
+    @XmlElement(name = "categoria")
+    private List<Categoria> categorias;
+
+    @XmlElementWrapper(name = "Lineas")
+    @XmlElement(name = "Linea")
+    private List<Linea> Lineas;
+
+    @XmlElementWrapper(name = "factura")
     @XmlElement(name = "factura")
     private List<Factura> facturas;
 
-    @XmlElementWrapper(name = "lineas")
-    @XmlElement(name = "linea")
-    private List<Linea> lineas;
-
-
     public Data() {
-        clientes = new ArrayList<>();
-        cajeros = new ArrayList<>();
-        categorias= new ArrayList<>();
-        productos = new ArrayList<>();
-        facturas = new ArrayList<>();
-        lineas = new ArrayList<>();
-
+        this.clientes = new ArrayList<>();
+        this.cajeros = new ArrayList<>();
+        this.productos = new ArrayList<>();
+        this.categorias = new ArrayList<>();
+        this.Lineas = new ArrayList<>();
+        this.facturas = new ArrayList<>();
     }
+
+
 
     public List<Cliente> getClientes() {
         return clientes;
     }
+
     public List<Cajero> getCajeros() {
         return cajeros;
     }
-    public List<Categoria> getCategorias() {
-        return categorias;
-    }
-    public List<Producto> getProductos() {
-        return this.productos;
-    }
 
-    public List<Factura> getFacturas() {
-        return facturas;
-    }
+    public List<Producto> getProductos() { return productos; }
 
-    public List<Linea> getLineas() {
-        return lineas;
-    }
-    public void setCategorias(List<Categoria> categorias) {
-        this.categorias = categorias;
-    }
+    public List<Categoria> getCategorias(){return categorias;}
+
+    public List<Linea> getLineas(){return Lineas;}
+
+    public List<Factura> getFacturas(){return facturas;}
 }
