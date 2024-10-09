@@ -11,16 +11,16 @@ public class Controller {
     View view;
     Model model;
     //1
-    public Controller(View view, Model model) {
+    public Controller(View view, Model model) throws Exception {
         this.view = view;
         this.model = model;
 
         view.setController(this);
         view.setModel(model);
 
-        List<Factura> facturas = Service.instance().getAllFacturas();
+        List<Factura> facturas = Service.instance().getAllFacturas(); //falta
         List<Cliente> clientes = Service.instance().getAllClientes();
-        List<Producto> productos = Service.instance().getAllProductos();
+        List<Producto> productos = Service.instance().getAllProductos(); //falta
         List<Cajero> cajeros = Service.instance().getAllCajeros();
 
         model.init(facturas, clientes, productos, cajeros);

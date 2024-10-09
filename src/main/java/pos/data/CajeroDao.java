@@ -74,6 +74,7 @@ public class CajeroDao {
         }
         return resultado;
     }
+
     //hay que hacer esto para cada clase DAO MENOS categorias
     public List<Cajero> getAllCajeros() throws Exception {
         List<Cajero> cajeros = new ArrayList<>();

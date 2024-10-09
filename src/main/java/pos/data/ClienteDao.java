@@ -110,6 +110,21 @@ public class ClienteDao {
         return resultado;
     }
 
+    public List<Cliente> getAllClientes() throws Exception {
+        List<Cliente> clientes = new ArrayList<>();
+        String sql = "SELECT * FROM Cliente";
+
+        // Usar try-with-resources para asegurar el cierre de los recursos
+        try (PreparedStatement stm = db.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery()) { // Ejecutar la consulta
+            while (rs.next()) {
+                Cliente c = from(rs); // Convertir el ResultSet en un objeto Cliente
+                clientes.add(c); // Agregar el Cliente a la lista
+            }
+        } // El PreparedStatement y el ResultSet se cierran automáticamente aquí
+
+        return clientes; // Retornar la lista de Clientes
+    }
 
     public Cliente from(ResultSet rs) throws Exception {
         Cliente c = new Cliente();

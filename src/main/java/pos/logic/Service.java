@@ -97,6 +97,9 @@ public class Service {
         }
     }
 
+    public List<Cliente> getAllClientes() throws Exception {
+       return clientesDao.getAllClientes();
+    }
 
     //================ CAJEROS ================
     public void create(Cajero e) throws Exception {
@@ -121,6 +124,10 @@ public class Service {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public List<Cajero> getAllCajeros() throws Exception {
+        return cajerosDao.getAllCajeros();
     }
 
     //================ FACTURAS ================
