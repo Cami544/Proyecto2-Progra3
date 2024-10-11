@@ -45,19 +45,17 @@ public class Controller {
             Cliente cliente = new Cliente();
             cliente.setNombre(nombreCliente);
             filter.setCliente(cliente);
-            List<Factura> facturasFiltradas = Service.instance().searchFacturasByCliente(filter);
-            model.setList(facturasFiltradas);
+            List<Factura> facturas = Service.instance().obtenerFacturasDeCliente(filter);
+            model.setList(facturas);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-
     public void clear() {
         model.setMode(Application.MODE_CREATE);
         model.setCurrent(new Factura());
     }
-
 
     public void updateFacturasTable() {
         List<Factura> facturas = model.getList();
@@ -79,8 +77,6 @@ public class Controller {
             columnModel.getColumn(4).setPreferredWidth(150);
 
     }
-
-
 
     public void updateLineasTable(Factura factura) {
         List<Linea> lineas = factura.getLineas();
@@ -133,11 +129,11 @@ public class Controller {
 
 
         for(Factura e: model.getList()){
-            body.addCell(getCell(new Paragraph(e.getNumero()), TextAlignment.CENTER,true));
+            body.addCell(getCell(new Paragraph(String.valueOf(e.getNumero())), TextAlignment.CENTER,true));
             body.addCell(getCell(new Paragraph(String.valueOf(e.getCliente())),TextAlignment.CENTER,true));
             body.addCell(getCell(new Paragraph(String.valueOf(e.getCajero())), TextAlignment.CENTER,true));
             body.addCell(getCell(new Paragraph(String.valueOf(e.getFecha())), TextAlignment.CENTER,true));
-            body.addCell(getCell(new Paragraph(String.valueOf(e.precioTotalPagar())), TextAlignment.CENTER,true));
+            body.addCell(getCell(new Paragraph(String.valueOf(e.precioTotalAPagar())), TextAlignment.CENTER,true));
         }
         document.add(body);
         document.close();

@@ -39,6 +39,7 @@ public class Database {
         } catch (Exception e) {
             System.err.println("FALLÓ CONEXION A BASE DE DATOS");
             System.err.println(e.getMessage());
+            e.printStackTrace();
             System.exit(-1);
         }
     }

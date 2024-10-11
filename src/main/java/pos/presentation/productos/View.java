@@ -219,7 +219,7 @@ public class View implements PropertyChangeListener {
 
         List<Categoria> categorias = null;
         try {
-            categorias = Service.instance().getAllCategorias();
+            categorias = Service.instance().obtenerTodasCategorias();
         } catch (Exception e) {
             System.out.println("Error al cargar categorías: " + e.getMessage());
             return;

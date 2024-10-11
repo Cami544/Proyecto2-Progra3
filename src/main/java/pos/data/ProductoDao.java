@@ -1,11 +1,11 @@
 package pos.data;
 
-import pos.logic.Cajero;
 import pos.logic.Categoria;
 import pos.logic.Producto;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,7 +97,7 @@ public class ProductoDao {
         }
         return resultado;
     }
-    public List<Producto> getAllProductos() throws Exception {
+    public List<Producto> ObtenerTodosProductos() throws Exception {
         List<Producto> productos = new ArrayList<>();
         String sql = "SELECT p.*, c.id AS categoria FROM Producto p " +
                 "JOIN Categoria c ON p.categoria = c.id"; // Asegúrate de que el nombre de la columna sea correcto
@@ -111,7 +111,25 @@ public class ProductoDao {
         }
         return productos;
     }
+    public Producto buscarProductoPorId(String codigo) throws Exception {
+        String sql = "SELECT * FROM Producto t " +
+                "INNER JOIN Categoria c ON t.categoria = c.id " +
+                "WHERE t.codigo = ?";
 
+        PreparedStatement stm = db.prepareStatement(sql);
+        stm.setString(1, codigo);
+        ResultSet rs = db.executeQuery(stm);
+
+        CategoriaDao categoriaDao = new CategoriaDao();
+        if (rs.next()) {
+            Producto r = from(rs, "t");
+            r.setCategoria(categoriaDao.from(rs, "c"));
+            return r;
+        } else {
+            // Aqui se lanza una excepción si no se encuentra el producto
+            throw new Exception("Producto NO EXISTE");
+        }
+    }
 
     public Producto from(ResultSet rs, String alias) throws Exception {
         Producto e = new Producto();

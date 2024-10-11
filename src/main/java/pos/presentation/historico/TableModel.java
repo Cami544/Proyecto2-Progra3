@@ -25,7 +25,7 @@ public class TableModel extends AbstractTableModel<Factura> implements javax.swi
             case NOMBRECliente: return e.getCliente().getNombre();
             case NOMBRECAJERO: return e.getCajero().getNombre();
             case FECHA: return e.getFecha();
-            case IMPORTE: return e.precioTotalPagar();
+            case IMPORTE: return e.precioTotalAPagar();
             default: return "";
         }
     }

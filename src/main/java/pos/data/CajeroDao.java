@@ -76,7 +76,7 @@ public class CajeroDao {
     }
 
     //hay que hacer esto para cada clase DAO MENOS categorias
-    public List<Cajero> getAllCajeros() throws Exception {
+    public List<Cajero> obtenerTodosCajeros() throws Exception {
         List<Cajero> cajeros = new ArrayList<>();
         String sql = "SELECT * FROM Cajero"; // Consulta SQL para seleccionar todos los cajeros
         try (PreparedStatement stm = db.prepareStatement(sql)) { // Prepara la declaración SQL

@@ -69,7 +69,7 @@ public class Factura {
         this.lineas = lineas;
     }
 
-    public double precioTotalPagar() {
+    public double precioTotalAPagar() {
         double total = 0.0;
         for (Linea linea : getLineas()) {
             total += linea.getTotal();
@@ -85,7 +85,7 @@ public class Factura {
         return cantidad;
     }
 
-    public double precioNetoPagarT() {
+    public double precioTotalNetoAPagar() {
         double subtotal = 0.0;
         for (Linea linea : getLineas()) {
             subtotal += linea.getNeto();
@@ -93,7 +93,7 @@ public class Factura {
         return subtotal;
     }
 
-    public double ahorroXDescuentoT() {
+    public double totalAhorradoPorDescuento() {
         double descuentos = 0.0;
         for (Linea linea : getLineas()) {
             descuentos += (linea.getNeto() - linea.getTotal());

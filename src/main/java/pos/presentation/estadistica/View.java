@@ -60,7 +60,11 @@ public class View implements PropertyChangeListener {
             public void actionPerformed(ActionEvent e) {
                 {
                     if (list.getSelectedRow() != -1) {
-                        controller.removeCategoria(list.getSelectedRow());
+                        try {
+                            controller.quitarCategoria(list.getSelectedRow());
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
                     } else {
                         JOptionPane.showMessageDialog(panel, "Seleccione una categoria", "Error", JOptionPane.ERROR_MESSAGE);
                     }
@@ -71,7 +75,11 @@ public class View implements PropertyChangeListener {
         borrarTodo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                controller.clear();
+                try {
+                    controller.clear();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
 
             }
         });
@@ -80,13 +88,17 @@ public class View implements PropertyChangeListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (validar()) {
-                    controller.actualizarRango(
-                            Integer.parseInt((String) AnioDesde.getSelectedItem()),
-                            mesDesde.getSelectedIndex() + 1,
-                            Integer.parseInt((String) AnioHasta.getSelectedItem()),
-                            mesHasta.getSelectedIndex() + 1
+                    try {
+                        controller.actualizarRangos(
+                                Integer.parseInt((String) AnioDesde.getSelectedItem()),
+                                mesDesde.getSelectedIndex() + 1,
+                                Integer.parseInt((String) AnioHasta.getSelectedItem()),
+                                mesHasta.getSelectedIndex() + 1
 
-                    );
+                        );
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
 
                 }
             }
@@ -238,7 +250,11 @@ public class View implements PropertyChangeListener {
                 graficaPanel.add(chartPanel);
                 break;
             case Model.RANGE:
-                controller.actualizarDatos();
+                try {
+                    controller.actualizarDatos();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 actualizarVista();
                 break;
             default:

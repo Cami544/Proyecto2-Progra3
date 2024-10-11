@@ -5,6 +5,7 @@ import pos.logic.Categoria;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,5 +38,26 @@ public class CategoriaDao {
         e.setNombreCategoria(rs.getString(alias + ".nombre"));
         return e;
     }
+    public List<Categoria> obtenerTodasCategorias() throws Exception {
+        List<Categoria> categorias = new ArrayList<>();
+        String sql = "SELECT * FROM Categoria";
 
+        try (PreparedStatement stm = db.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery()) {
+
+            while (rs.next()) {
+                Categoria categoria = new Categoria();
+                categoria.setIdCategoria(String.valueOf(rs.getInt("id"))); // Ajusta el nombre de la columna
+                categoria.setNombreCategoria(rs.getString("nombre"));
+
+                categorias.add(categoria); // Agregar la categoría a la lista
+            }
+        } catch (SQLException ex) {
+            throw new Exception("Error al obtener todas las categorías", ex);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return categorias; // Devolver la lista de categorías
+    }
 }

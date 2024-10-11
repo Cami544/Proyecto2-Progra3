@@ -21,8 +21,8 @@ public class Model extends AbstractModel {
     public static final String RANGE = "range";
     public static final String CATEGORIES_ALL = "CATEGORIES";
 
-    public Model() {
-        categoriasAll = Service.instance().getAllCategorias();
+    public Model() throws Exception {
+        categoriasAll = Service.instance().obtenerTodasCategorias();
         categorias = new ArrayList<>(categoriasAll);
     }
 

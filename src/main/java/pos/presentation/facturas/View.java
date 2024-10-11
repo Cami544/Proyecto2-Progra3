@@ -44,13 +44,11 @@ public class View implements PropertyChangeListener {
 
     private JTable table;
 
-
-
     Model model;
     Controller controller;
 
     public JPanel getPanel() {
-        controller.actualizarTotales();
+        controller.updateTotales();
         return panel;
     }
 
@@ -74,8 +72,8 @@ public class View implements PropertyChangeListener {
                 String productId = buscarProductoTxtField.getText();
                 if (productId != null && !productId.trim().isEmpty()) {
                     try {
-                        controller.buscarProductoPorId(productId);
-                        controller.actualizarTotales();
+                        controller.buscarProductoPorCodigo(productId);
+                        controller.updateTotales();
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
@@ -116,7 +114,7 @@ public class View implements PropertyChangeListener {
                 } else {
                     JOptionPane.showMessageDialog(panel, "Seleccione una línea en la lista para modificar la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                controller.actualizarTotales();
+                controller.updateTotales();
             }
         });
 
@@ -156,14 +154,19 @@ public class View implements PropertyChangeListener {
                 } else {
                     JOptionPane.showMessageDialog(panel, "Seleccione una línea en la lista para modificar la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                controller.actualizarTotales();
+                controller.updateTotales();
             }
         });
 
         buscarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<Producto> productos = controller.buscarProductos("");
+                List<Producto> productos = null;
+                try {
+                    productos = controller.buscaProductoConNombre("");
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
                 SearchDialog dialog = new SearchDialog((Frame) SwingUtilities.getWindowAncestor(panel), productos);
                 dialog.setVisible(true);
 
@@ -198,7 +201,7 @@ public class View implements PropertyChangeListener {
                     model.getCurrent().getLineas().remove(lineaSeleccionada);
                     tableModel.removeLinea(selectedRow);
                     tableModel.fireTableRowsDeleted(selectedRow, selectedRow);
-                    controller.actualizarTotales();
+                    controller.updateTotales();
                 } else {
                     JOptionPane.showMessageDialog(panel, "Seleccione una línea para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -224,7 +227,7 @@ public class View implements PropertyChangeListener {
         Factura factura = take();
         try {
 
-            controller.save(factura);
+            controller.saveFactura(factura);
 
             controller.actualizarExistenciasFactura(factura);
             cancelar();
@@ -285,10 +288,10 @@ public class View implements PropertyChangeListener {
                 TableColumnModel columnModel = listLineas.getColumnModel();
                 columnModel.getColumn(1).setPreferredWidth(150);
                 columnModel.getColumn(5).setPreferredWidth(150);
-                controller.actualizarTotales();
+                controller.updateTotales();
                 break;
             case Model.CURRENT:
-                controller.actualizarTotales();
+                controller.updateTotales();
                 break;
             case Model.FILTER:
                 List<Linea> lineas = model.getFilter().getLineas();
@@ -336,16 +339,19 @@ public class View implements PropertyChangeListener {
     public Factura take() {
         Factura factura = new Factura();
 
-        factura.setNumero(generateFacturaNumber());
+        try {
+            // Obtiene el siguiente número de factura desde la base de datos
+            int siguienteNumero = Service.instance().obtenerSiguienteNumeroFactura();
+            factura.setNumero(siguienteNumero);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener el número de factura", e);
+        }
 
         Cliente clienteSeleccionado = (Cliente) clientes.getSelectedItem();
-
         Cajero cajeroSeleccionado = (Cajero) cajeros.getSelectedItem();
 
         factura.setCajero(cajeroSeleccionado);
-
         factura.setCliente(clienteSeleccionado);
-
         factura.setFecha(LocalDate.now());
 
         TableModel tableModel = (TableModel) listLineas.getModel();
@@ -354,7 +360,7 @@ public class View implements PropertyChangeListener {
             Linea linea = tableModel.getLineaAt(i);
             lineas.add(linea);
             try {
-                controller.save(linea);
+                controller.saveLinea(linea);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -363,37 +369,35 @@ public class View implements PropertyChangeListener {
         return factura;
     }
 
+
     private String generateFacturaNumber() {
         String facturaNumber = "FAC-";
         return (facturaNumber+((int) (Math.random() * 100000)));
     }
 
-
-
-
     public class SearchDialog extends JDialog {
-        private JLabel nombre;
-        private JTextField searchField;
+        private JLabel nombreLbl;
+        private JTextField buscarTxtField;
         private JTable resultTable;
         private DefaultTableModel tableModel;
-        private List<Producto> productos;
+        private List<Producto> listaproducto;
         private List<Producto> productosFiltrados;
-        private Producto selectedProducto;
+        private Producto productoSeleccionado;
         private JButton okButton;
         private JButton cancelButton;
 
         public SearchDialog(Frame parent, List<Producto> productos) {
             super(parent, "Buscar Producto", true);
-            this.productos = productos;
+            this.listaproducto = productos;
 
             setLayout(new BorderLayout());
-            controller.actualizarTotales();
+            controller.updateTotales();
             JPanel searchPanel = new JPanel();
             searchPanel.setLayout(new FlowLayout());
-            nombre = new JLabel("Nombre: ");
-            searchField = new JTextField(20);
-            searchPanel.add(nombre);
-            searchPanel.add(searchField);
+            nombreLbl = new JLabel("Nombre: ");
+            buscarTxtField = new JTextField(20);
+            searchPanel.add(nombreLbl);
+            searchPanel.add(buscarTxtField);
 
             tableModel = new DefaultTableModel(new Object[]{"ID", "Nombre", "Categoría", "Precio"}, 0) {
                 @Override
@@ -422,7 +426,7 @@ public class View implements PropertyChangeListener {
             setResizable(false);
             loadAllProductos();
 
-            searchField.getDocument().addDocumentListener(new DocumentListener() {
+            buscarTxtField.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     search();
@@ -445,13 +449,13 @@ public class View implements PropertyChangeListener {
                     if (e.getClickCount() == 2) {
                         int selectedRow = resultTable.getSelectedRow();
                         if (selectedRow != -1) {
-                            selectedProducto = productosFiltrados.get(selectedRow);
+                            productoSeleccionado = productosFiltrados.get(selectedRow);
                             try {
-                                controller.buscarProductoPorId(selectedProducto.getId());
+                                controller.buscarProductoPorCodigo(productoSeleccionado.getId());
                             } catch (Exception ex) {
                                 throw new RuntimeException(ex);
                             }
-                            controller.actualizarTotales();
+                            controller.updateTotales();
                             dispose();
                         }
                     }
@@ -463,13 +467,13 @@ public class View implements PropertyChangeListener {
                 public void actionPerformed(ActionEvent e) {
                     int selectedRow = resultTable.getSelectedRow();
                     if (selectedRow != -1) {
-                        selectedProducto = productosFiltrados.get(selectedRow);
+                        productoSeleccionado = productosFiltrados.get(selectedRow);
                         try {
-                            controller.buscarProductoPorId(selectedProducto.getId());
+                            controller.buscarProductoPorCodigo(productoSeleccionado.getId());
                         } catch (Exception ex) {
                             throw new RuntimeException(ex);
                         }
-                        controller.actualizarTotales();
+                        controller.updateTotales();
                         dispose();
                     }
                 }
@@ -478,7 +482,7 @@ public class View implements PropertyChangeListener {
             cancelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    selectedProducto = null;
+                    productoSeleccionado = null;
                     dispose();
                 }
             });
@@ -489,9 +493,9 @@ public class View implements PropertyChangeListener {
 
         private void loadAllProductos() {
             tableModel.setRowCount(0);
-            productosFiltrados = new ArrayList<>(productos);
+            productosFiltrados = new ArrayList<>(listaproducto);
 
-            for (Producto producto : productos) {
+            for (Producto producto : listaproducto) {
                 tableModel.addRow(new Object[]{
                         producto.getId(),
                         producto.getNombre(),
@@ -502,11 +506,11 @@ public class View implements PropertyChangeListener {
         }
 
         private void search() {
-            String query = searchField.getText().toLowerCase();
+            String query = buscarTxtField.getText().toLowerCase();
             tableModel.setRowCount(0);
             productosFiltrados = new ArrayList<>();
 
-            for (Producto producto : productos) {
+            for (Producto producto : listaproducto) {
                 if (producto.getNombre().toLowerCase().contains(query)) {
                     productosFiltrados.add(producto);
                     tableModel.addRow(new Object[]{
@@ -519,8 +523,8 @@ public class View implements PropertyChangeListener {
             }
         }
 
-        public Producto getSelectedProducto() {
-            return selectedProducto;
+        public Producto getProductoSeleccionado() {
+            return productoSeleccionado;
         }
     }
 
@@ -528,49 +532,49 @@ public class View implements PropertyChangeListener {
 
     public class CobroDialog extends JDialog {
 
-        private JLabel efectivo;
-        private JTextField efectivoField;
-        private JLabel tarjeta;
-        private JTextField tarjetaField;
-        private JLabel cheque;
-        private JTextField chequeField;
-        private JLabel sinpe;
-        private JTextField sinpeField;
+        private JLabel efectivoLbl;
+        private JTextField efectivoTxtField;
+        private JLabel tarjetaLbl;
+        private JTextField tarjetaTxtField;
+        private JLabel chequeLbl;
+        private JTextField chequeTxtField;
+        private JLabel sinpeLbl;
+        private JTextField sinpeTxtField;
         private JButton okButton;
         private JButton cancelButton;
-        private JLabel totalLabel;
+        private JLabel totalLbl;
 
         public CobroDialog(Frame parent) {
             super(parent, "Pago", true);
             setLayout(new BorderLayout());
-            controller.actualizarTotales();
+            controller.updateTotales();
             JPanel pagosRecibidos = new JPanel();
             pagosRecibidos.setLayout(new GridLayout(4, 2, 2, 2));
             pagosRecibidos.setBorder(BorderFactory.createTitledBorder("Pagos recibidos"));
 
-            efectivo = new JLabel("Efectivo:");
-            efectivoField = new JTextField(20);
-            tarjeta = new JLabel("Tarjeta:");
-            tarjetaField = new JTextField(20);
-            cheque = new JLabel("Cheque:");
-            chequeField = new JTextField(20);
-            sinpe = new JLabel("Sinpe:");
-            sinpeField = new JTextField(20);
+            efectivoLbl = new JLabel("Efectivo:");
+            efectivoTxtField = new JTextField(20);
+            tarjetaLbl = new JLabel("Tarjeta:");
+            tarjetaTxtField = new JTextField(20);
+            chequeLbl = new JLabel("Cheque:");
+            chequeTxtField = new JTextField(20);
+            sinpeLbl = new JLabel("Sinpe:");
+            sinpeTxtField = new JTextField(20);
 
-            pagosRecibidos.add(efectivo);
-            pagosRecibidos.add(efectivoField);
-            pagosRecibidos.add(tarjeta);
-            pagosRecibidos.add(tarjetaField);
-            pagosRecibidos.add(cheque);
-            pagosRecibidos.add(chequeField);
-            pagosRecibidos.add(sinpe);
-            pagosRecibidos.add(sinpeField);
+            pagosRecibidos.add(efectivoLbl);
+            pagosRecibidos.add(efectivoTxtField);
+            pagosRecibidos.add(tarjetaLbl);
+            pagosRecibidos.add(tarjetaTxtField);
+            pagosRecibidos.add(chequeLbl);
+            pagosRecibidos.add(chequeTxtField);
+            pagosRecibidos.add(sinpeLbl);
+            pagosRecibidos.add(sinpeTxtField);
             JPanel importePanel = new JPanel();
             importePanel.setBorder(BorderFactory.createTitledBorder("Importe a pagar"));
-            totalLabel = new JLabel(String.valueOf(model.current.precioTotalPagar()));
-            totalLabel.setFont(new Font("Serif", Font.BOLD, 20));
-            totalLabel.setForeground(Color.BLUE);
-            importePanel.add(totalLabel);
+            totalLbl = new JLabel(String.valueOf(model.current.precioTotalAPagar()));
+            totalLbl.setFont(new Font("Serif", Font.BOLD, 20));
+            totalLbl.setForeground(Color.BLUE);
+            importePanel.add(totalLbl);
             importePanel.setLayout(new GridLayout(1, 2, 1, 1));
             JPanel buttonPanel = new JPanel();
             okButton = new JButton("OK");
@@ -591,13 +595,13 @@ public class View implements PropertyChangeListener {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        double efectivo = efectivoField.getText().isEmpty() ? 0 : Double.parseDouble(efectivoField.getText());
-                        double tarjeta = tarjetaField.getText().isEmpty() ? 0 : Double.parseDouble(tarjetaField.getText());
-                        double cheque = chequeField.getText().isEmpty() ? 0 : Double.parseDouble(chequeField.getText());
-                        double sinpe = sinpeField.getText().isEmpty() ? 0 : Double.parseDouble(sinpeField.getText());
+                        double efectivo = efectivoTxtField.getText().isEmpty() ? 0 : Double.parseDouble(efectivoTxtField.getText());
+                        double tarjeta = tarjetaTxtField.getText().isEmpty() ? 0 : Double.parseDouble(tarjetaTxtField.getText());
+                        double cheque = chequeTxtField.getText().isEmpty() ? 0 : Double.parseDouble(chequeTxtField.getText());
+                        double sinpe = sinpeTxtField.getText().isEmpty() ? 0 : Double.parseDouble(sinpeTxtField.getText());
 
                         double totalPago = efectivo + tarjeta + cheque + sinpe;
-                        double totalFactura = model.current.precioTotalPagar();
+                        double totalFactura = model.current.precioTotalAPagar();
 
                         if (totalPago >= totalFactura) {
 

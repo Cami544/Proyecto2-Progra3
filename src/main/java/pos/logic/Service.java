@@ -37,6 +37,7 @@ public class Service {
     public void stop(){
     }
 
+
     //================= PRODUCTOS ============
     public void create(Producto e) throws Exception {
         productoDao.create(e);
@@ -62,6 +63,23 @@ public class Service {
         }
     }
 
+    public List<Producto> obtenerTodosProductos() throws Exception{
+        try{
+            return productoDao.ObtenerTodosProductos();
+        }catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public Producto buscarProductoPorId(String id) throws Exception{
+        try{
+            return productoDao.buscarProductoPorId(id);
+        }catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+
     //================= CATEGORIAS ============
     public List<Categoria> search(Categoria e) {
         try {
@@ -69,6 +87,9 @@ public class Service {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+    public List<Categoria> obtenerTodasCategorias() throws Exception {
+        return categoriaDao.obtenerTodasCategorias();
     }
 
     //================ CLIENTES ================
@@ -97,9 +118,10 @@ public class Service {
         }
     }
 
-    public List<Cliente> getAllClientes() throws Exception {
-       return clientesDao.getAllClientes();
+    public List<Cliente> obtenerTodosClientes() throws Exception {
+        return clientesDao.obtenerTodosClientes();
     }
+
 
     //================ CAJEROS ================
     public void create(Cajero e) throws Exception {
@@ -126,9 +148,10 @@ public class Service {
         }
     }
 
-    public List<Cajero> getAllCajeros() throws Exception {
-        return cajerosDao.getAllCajeros();
+    public List<Cajero> obtenerTodosCajeros() throws Exception {
+        return cajerosDao.obtenerTodosCajeros();
     }
+
 
     //================ FACTURAS ================
     public void create(Factura e) throws Exception {
@@ -154,6 +177,19 @@ public class Service {
             throw new RuntimeException(ex);
         }
     }
+
+    public List<Factura> obtenerTodasFacturas() throws Exception {
+        return facturasDao.obtenerTodasFacturas();
+    }
+
+    public int obtenerSiguienteNumeroFactura() throws Exception {
+        return facturasDao.obtenerSiguienteNumeroFactura();
+    }
+
+    public List<Factura> obtenerFacturasDeCliente(Factura factura) throws Exception {
+        return facturasDao.obtenerFacturasDeCliente(factura);
+    }
+
 
     //================ LINEAS ================
     public void create(Linea e) throws Exception {
@@ -188,6 +224,11 @@ public class Service {
         }
     }
 
+    public int obtenerSiguienteNumeroLinea() throws Exception{
+        return lineasDao.obtenerSiguienteNumeroLinea();
+    }
+
+
     //================ MÉTODOS DE CÁLCULO ================
     public double precioTotalPagar(Factura factura) throws Exception {
         return precioNetoPagarT(factura) - ahorroXDescuentoT(factura);
@@ -219,7 +260,9 @@ public class Service {
         }
         return cantidad;
     }
-
+    public float getVentas(Categoria c, int anio, int mes) throws Exception {
+        return facturasDao.getVentas(c, anio, mes);
+    }
 
 
 }

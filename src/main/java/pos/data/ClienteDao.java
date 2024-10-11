@@ -1,7 +1,6 @@
 package pos.data;
 
 import pos.logic.Cliente;
-import pos.logic.Producto;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -110,7 +109,7 @@ public class ClienteDao {
         return resultado;
     }
 
-    public List<Cliente> getAllClientes() throws Exception {
+    public List<Cliente> obtenerTodosClientes() throws Exception {
         List<Cliente> clientes = new ArrayList<>();
         String sql = "SELECT * FROM Cliente";
 

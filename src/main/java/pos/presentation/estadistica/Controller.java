@@ -15,10 +15,10 @@ public class Controller {
     private Model model;
 
 
-    public Controller(View view, Model model) {
+    public Controller(View view, Model model) throws Exception {
         this.view = view;
         this.model = model;
-        model.init(new ArrayList<Categoria>(Service.instance().getAllCategorias()));
+        model.init(new ArrayList<Categoria>(Service.instance().obtenerTodasCategorias()));
         view.setController(this);
         view.setModel(model);
     }
@@ -36,7 +36,7 @@ public class Controller {
 
     public void agregarTodasLasCategorias() {
         try {
-            List<Categoria> categorias = Service.instance().getAllCategorias();
+            List<Categoria> categorias = Service.instance().obtenerTodasCategorias();
             for (Categoria categoria : categorias) {
                 if (!model.getCategorias().contains(categoria)) {
                     model.getCategorias().add(categoria);
@@ -52,7 +52,7 @@ public class Controller {
 
     }
 
-    public void clear() {
+    public void clear() throws Exception {
         model.getCategorias().clear();
         model.init(model.getCategoriasAll());
         model.firePropertyChange(CATEGORIES_ALL);
@@ -62,14 +62,14 @@ public class Controller {
 
     public List<Factura> getFacturas() {
         try {
-            return Service.instance().getAllFacturas();
+            return Service.instance().obtenerTodasFacturas();
         } catch (Exception e) {
             System.out.println("Error al obtener facturas: " + e.getMessage());
             return null;
         }
     }
 
-    public void actualizarRango(int aniodesde, int mesdesde, int anioHasta, int mesHasta) {
+    public void actualizarRangos(int aniodesde, int mesdesde, int anioHasta, int mesHasta) throws Exception {
         if (aniodesde <= anioHasta && (aniodesde != anioHasta || mesdesde <= mesHasta)) {
             model.setRango(new Rango(aniodesde, mesdesde, anioHasta, mesHasta));
             actualizarDatos();
@@ -78,8 +78,8 @@ public class Controller {
         }
     }
 
-    public void fillCategoriaComboBox() {
-        List<Categoria> categorias = Service.instance().getAllCategorias();
+    public void fillCategoriaComboBox() throws Exception {
+        List<Categoria> categorias = Service.instance().obtenerTodasCategorias();
         if (categorias != null && !categorias.isEmpty()) {
             for (Categoria cat : categorias) {
                 view.categoriaComboBox.addItem(cat);
@@ -90,7 +90,7 @@ public class Controller {
         }
     }
 
-    public void agregarLineaACategoria(String categoria, Float[] datos) {
+    public void agregarLineaACategoria(String categoria, Float[] datos) throws Exception {
         if (categoria != null && datos != null) {
             int index = model.getRows().indexOf(categoria);
             if (index != -1) {
@@ -106,15 +106,15 @@ public class Controller {
         }
     }
 
-    public void removeCategoria(int selectedRow) {
+    public void quitarCategoria(int selectedRow) throws Exception {
         model.getCategorias().remove(selectedRow);
-        if (model.getCategorias().isEmpty()) { model.init(Service.instance().getAllCategorias());}
+        if (model.getCategorias().isEmpty()) { model.init(Service.instance().obtenerTodasCategorias());}
         model.firePropertyChange(CATEGORIES_ALL);
         actualizarDatos();
     }
 
 
-    public void actualizarDatos() {
+    public void actualizarDatos() throws Exception {
 
         Rango r = model.getRango();
         int colCount = (r.getAnnosHasta() - r.getAnnosDesde()) * 12 + r.getMesHasta() - r.getMesDesde() + 1;

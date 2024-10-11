@@ -168,6 +168,18 @@ public class LineaDao {
         return resultado;
     }
 
+    public int obtenerSiguienteNumeroLinea() throws Exception {
+        String sql = "SELECT COALESCE(MAX(numero), 0) + 1 AS siguiente_numero FROM Linea"; // para tener el numero siguiente de linea
+        try (PreparedStatement stm = db.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("siguiente_numero");
+            } else {
+                throw new Exception("No se pudo obtener el siguiente número de línea");
+            }
+        }
+    }
+
     public Linea from(ResultSet rs, String alias) throws Exception {
         Linea e = new Linea();
         e.setNumero(rs.getInt(alias + ".numero"));
