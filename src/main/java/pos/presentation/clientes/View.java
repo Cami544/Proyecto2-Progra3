@@ -18,7 +18,7 @@ public class View implements PropertyChangeListener {
     private JPanel panel;
     private JTextField BuscarNombreTxtField;
     private JButton BuscarButton;
-    private JButton save;
+    private JButton guardarButton;
     private JTable list;
     private JButton delete;
     private JButton report;
@@ -54,7 +54,7 @@ public class View implements PropertyChangeListener {
             }
         });
 
-        save.addActionListener(new ActionListener() {
+        guardarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (validate()) {

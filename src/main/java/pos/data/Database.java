@@ -75,7 +75,7 @@ public class Database {
         try {
             return cnx.prepareStatement(statement,Statement.RETURN_GENERATED_KEYS);
         } catch (SQLException e) {
-            throw new Exception("ERROR DE BASE DE DATOS");
+            throw new Exception("ERROR DE BASE DE DATOS Prepared Statement");
         }
     }
 
@@ -86,7 +86,7 @@ public class Database {
         } catch (SQLIntegrityConstraintViolationException ex) {
             throw new Exception("REGISTRO DUPLICADO o REFERENCIA NO EXISTE");
         } catch (Exception ex) {
-            throw new Exception("ERROR DE BASE DE DATOS");
+            throw new Exception("ERROR DE BASE DE DATOS Update");
         }
     }
 
@@ -99,7 +99,7 @@ public class Database {
         } catch (SQLIntegrityConstraintViolationException ex) {
             throw new Exception("REGISTRO DUPLICADO o REFERENCIA NO EXISTE");
         } catch (Exception ex) {
-            throw new Exception("ERROR DE BASE DE DATOS");
+            throw new Exception("ERROR DE BASE DE DATOS Update with Keys");
         }
     }
 
@@ -107,7 +107,7 @@ public class Database {
         try {
             return statement.executeQuery();
         } catch (SQLException e) {
-            throw new Exception("ERROR DE BASE DE DATOS");
+            throw new Exception("ERROR DE BASE DE DATOS Query");
         }
     }
 }

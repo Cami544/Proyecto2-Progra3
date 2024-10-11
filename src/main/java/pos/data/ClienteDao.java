@@ -24,6 +24,7 @@ public class ClienteDao {
         stmt.setString(2, cliente.getNombre());
         stmt.setString(3, cliente.getTelefono());
         stmt.setString(4, cliente.getEmail());
+        stmt.setDouble(5, cliente.getDescuento());
         db.executeUpdate(stmt);
     }
 
