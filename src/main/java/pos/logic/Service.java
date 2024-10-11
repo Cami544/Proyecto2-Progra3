@@ -170,12 +170,8 @@ public class Service {
         facturasDao.delete(e);
     }
 
-    public List<Factura> search(Factura e) {
-        try {
-            return facturasDao.search(e);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+    public List<Factura> search(Factura e) throws Exception {
+        return facturasDao.search(e);
     }
 
     public List<Factura> obtenerTodasFacturas() throws Exception {

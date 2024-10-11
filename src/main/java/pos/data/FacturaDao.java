@@ -102,8 +102,20 @@ public class FacturaDao {
                 "WHERE c.nombre LIKE ? OR f.fecha = ?"; // Puedes ajustar las condiciones según sea necesario
 
         PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, "%" + e.getCliente().getNombre() + "%"); // Suponiendo que tienes un metodo getNombre en Cliente
-        stm.setDate(2, Date.valueOf(e.getFecha())); // Convertir LocalDate a java.sql.Date para la comparación
+
+        // Verificar si el cliente no es null antes de acceder a su nombre
+        if (e.getCliente() != null && e.getCliente().getNombre() != null) {
+            stm.setString(1, "%" + e.getCliente().getNombre() + "%");
+        } else {
+            stm.setString(1, "%"); // Usar un comodín que coincida con cualquier nombre
+        }
+
+        // Verificar si la fecha no es null antes de convertirla
+        if (e.getFecha() != null) {
+            stm.setDate(2, Date.valueOf(e.getFecha()));
+        } else {
+            stm.setDate(2, null); // O manejarlo de acuerdo a tu lógica de negocio
+        }
 
         ResultSet rs = db.executeQuery(stm);
 
@@ -117,6 +129,7 @@ public class FacturaDao {
 
         return resultado; // Retornar la lista de facturas encontradas
     }
+
 
     public List<Factura> obtenerTodasFacturas() throws Exception {
         List<Factura> facturas = new ArrayList<>();

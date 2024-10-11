@@ -22,11 +22,11 @@ import java.util.List;
 public class Controller {
     View view;
     Model model;
-    public Controller(View view, Model model) {
+    public Controller(View view, Model model) throws Exception {
         this.view = view;
         this.model = model;
-        List<Factura> initialList = Service.instance().search(new Factura());
-        model.init(initialList);
+        List<Factura> facturas = Service.instance().search(new Factura());
+        model.init(facturas);
         view.setController(this);
         view.setModel(model);
         updateFacturasTable();
