@@ -19,14 +19,16 @@ public class ProductoDao {
     public void create(Producto e) throws Exception {
         String sql = "insert into " +
                 "Producto " +
-                "(codigo ,descripcion, unidadMedida,precioUnitario,categoria) " +
+                "(codigo , nombre, descripcion, unidadMedida,precioUnitario,existencias, categoria) " +
                 "values(?,?,?,?,?)";
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setString(1, e.getId());
-        stm.setString(2, e.getDescripcion());
-        stm.setString(3, e.getUnidadMedida());
-        stm.setDouble(4, e.getPrecio());
-        stm.setString(5, e.getCategoria().getIdCategoria());
+        stm.setString(2, e.getNombre());
+        stm.setString(3, e.getDescripcion());
+        stm.setString(4, e.getUnidadMedida());
+        stm.setDouble(5, e.getPrecio());
+        stm.setInt(6,    e.getExistencias());
+        stm.setString(7, e.getCategoria().getIdCategoria());
         db.executeUpdate(stm);
     }
 
@@ -35,7 +37,7 @@ public class ProductoDao {
                 "* " +
                 "from  Producto t " +
                 "inner join Categoria c on t.categoria=c.id " +
-                "where t.codigo=?";
+                "where t.codigo?";
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setString(1, codigo);
         ResultSet rs = db.executeQuery(stm);
@@ -52,14 +54,16 @@ public class ProductoDao {
     public void update(Producto e) throws Exception {
         String sql = "update " +
                 "Producto " +
-                "set descripcion=?, unidadMedida=?, precioUnitario=?, categoria=? " +
+                "set nombre=?, descripcion=?, unidadMedida=?, precioUnitario=?, existencias=?, categoria=? " +
                 "where codigo=?";
         PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, e.getDescripcion());
-        stm.setString(2, e.getUnidadMedida());
-        stm.setDouble(3, e.getPrecio());
-        stm.setString(4, e.getCategoria().getIdCategoria());
-        stm.setString(5, e.getId());
+        stm.setString(1, e.getId());
+        stm.setString(2, e.getNombre());
+        stm.setString(3, e.getDescripcion());
+        stm.setString(4, e.getUnidadMedida());
+        stm.setDouble(5, e.getPrecio());
+        stm.setInt(6, e.getExistencias());
+        stm.setString(7, e.getCategoria().getIdCategoria()); //Revisar esta
         int count = db.executeUpdate(stm);
         if (count == 0) {
             throw new Exception("Producto NO EXISTE");
@@ -134,9 +138,12 @@ public class ProductoDao {
     public Producto from(ResultSet rs, String alias) throws Exception {
         Producto e = new Producto();
         e.setId(rs.getString(alias + ".codigo"));
+        e.setNombre(rs.getString(alias + ".nombre"));
         e.setDescripcion(rs.getString(alias + ".descripcion"));
         e.setUnidadMedida(rs.getString(alias + ".unidadMedida"));
         e.setPrecio(rs.getFloat(alias + ".precioUnitario"));
+        e.setExistencias(rs.getInt(alias + ".existencias"));
+
         // Crear un objeto Categoria y establecer su id
         Categoria categoria = new Categoria();
         categoria.setIdCategoria(rs.getString(alias + ".categoria")); // Ajusta según el nombre de la columna en la tabla

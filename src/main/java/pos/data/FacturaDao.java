@@ -137,7 +137,7 @@ public class FacturaDao {
         String sql = "SELECT f.numero, f.fecha, c.id AS cliente_id, c.nombre AS cliente_nombre, " +
                 "ca.id AS cajero_id, ca.nombre AS cajero_nombre, " +
                 "l.numero AS linea_id, l.cantidad, l.descuento, " +
-                "p.codigo AS producto_codigo, p.descripcion AS producto_descripcion, p.precioUnitario, " +
+                "p.codigo AS producto_codigo, p.nombre AS producto_nombre, p.descripcion AS producto_descripcion, p.precioUnitario, p.existencias " +
                 "cat.id AS categoria_id, cat.nombre AS categoria_nombre " +
                 "FROM factura f " +
                 "JOIN cliente c ON f.cliente = c.id " +

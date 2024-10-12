@@ -3,11 +3,11 @@ package pos.logic;
 import java.util.Objects;
 //sin xml
 public class Producto {
-    String id;
+    String codigo;
     String nombre;
     String descripcion;
     String unidadMedida;
-    double precio;
+    double precioUnitario;
     int existencias;
     Categoria categoria;
 
@@ -15,12 +15,12 @@ public class Producto {
         this("", "", "", 0, 0, "", null);
     }
 
-    public Producto(String id, String nombre, String descripcion, int existencias, double precio, String unidadMedida, Categoria categoria) {
-        this.id = id;
+    public Producto(String codigo, String nombre, String descripcion, int existencias, double precioUnitario, String unidadMedida, Categoria categoria) {
+        this.codigo = codigo;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.existencias = existencias;
-        this.precio = precio;
+        this.precioUnitario = precioUnitario;
         this.unidadMedida = unidadMedida;
         this.categoria = categoria;
     }
@@ -42,12 +42,10 @@ public class Producto {
     }
 
     public String getId() {
-        return id;
+        return codigo;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public void setId(String codigo) {this.codigo = codigo;}
 
     public String getUnidadMedida() {
         return unidadMedida;
@@ -58,11 +56,11 @@ public class Producto {
     }
 
     public double getPrecio() {
-        return precio;
+        return precioUnitario;
     }
 
-    public void setPrecio(double precio) {
-        this.precio = precio;
+    public void setPrecio(double precioUnitario) {
+        this.precioUnitario = precioUnitario;
     }
 
     public int getExistencias() {
@@ -86,7 +84,7 @@ public class Producto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Producto producto = (Producto) o;
-        return Objects.equals(id, producto.id);
+        return Objects.equals(codigo, producto.codigo);
     }
 
     @Override
@@ -96,6 +94,6 @@ public class Producto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(codigo);
     }
 }

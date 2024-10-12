@@ -55,7 +55,7 @@ public class Service {
         productoDao.delete(e);
     }
 
-    public List<Producto> search(Producto e) {
+    public List<Producto> search(Producto e) throws RuntimeException {
         try {
             return productoDao.search(e);
         } catch (Exception ex) {
