@@ -137,7 +137,7 @@ public class FacturaDao {
         String sql = "SELECT f.numero, f.fecha, c.id AS cliente_id, c.nombre AS cliente_nombre, " +
                 "ca.id AS cajero_id, ca.nombre AS cajero_nombre, " +
                 "l.numero AS linea_id, l.cantidad, l.descuento, " +
-                "p.codigo AS producto_codigo, p.nombre AS producto_nombre, p.descripcion AS producto_descripcion, p.precioUnitario, p.existencias " +
+                "p.codigo AS producto_codigo, p.nombre AS producto_nombre, p.descripcion AS producto_descripcion, p.unidadMedida As producto_unidadMedida,  p.precioUnitario, p.existencias, " +
                 "cat.id AS categoria_id, cat.nombre AS categoria_nombre " +
                 "FROM factura f " +
                 "JOIN cliente c ON f.cliente = c.id " +
@@ -146,44 +146,45 @@ public class FacturaDao {
                 "JOIN producto p ON l.producto = p.codigo " +
                 "JOIN categoria cat ON p.categoria = cat.id";
 
-        try (PreparedStatement stm = db.prepareStatement(sql);
-             ResultSet rs = stm.executeQuery()) {
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            ResultSet rs = stm.executeQuery();
 
-            Factura factura = null;
-            int facturaNumeroAnterior = -1;
+                Factura factura = null;
+                int facturaNumeroAnterior = -1;
 
-            while (rs.next()) {
-                int numeroFactura = rs.getInt("f.numero");
+                while (rs.next()) {
+                    int numeroFactura = rs.getInt("f.numero");
 
-                // Solo crear una nueva factura si el número de factura ha cambiado
-                if (factura == null || numeroFactura != facturaNumeroAnterior) {
-                    factura = from(rs);  // Crear nueva factura
-                    facturas.add(factura);
-                    facturaNumeroAnterior = numeroFactura;
+                    // Solo crear una nueva factura si el número de factura ha cambiado
+                    if (factura == null || numeroFactura != facturaNumeroAnterior) {
+                        factura = from(rs);  // Crear nueva factura
+                        facturas.add(factura);
+                        facturaNumeroAnterior = numeroFactura;
+                    }
+
+                    // Crear y agregar la línea de productos a la factura actual
+                    Linea linea = new Linea();
+                    linea.setNumero(rs.getInt("linea_id"));
+                    linea.setCantidad(rs.getInt("cantidad"));
+                    linea.setDescuento(rs.getFloat("descuento"));
+
+                    // Crear el producto y su categoría
+                    Producto producto = new Producto();
+                    producto.setId(rs.getString("producto_codigo"));
+                    producto.setDescripcion(rs.getString("producto_descripcion"));
+                    producto.setPrecio(rs.getFloat("precioUnitario"));
+
+                    Categoria categoria = new Categoria();
+                    categoria.setIdCategoria(rs.getString("categoria_id"));
+                    categoria.setNombreCategoria(rs.getString("categoria_nombre"));
+
+                    producto.setCategoria(categoria);
+                    linea.setProducto(producto);
+
+                    // Añadir la línea a la factura
+                    factura.getLineas().add(linea);
                 }
 
-                // Crear y agregar la línea de productos a la factura actual
-                Linea linea = new Linea();
-                linea.setNumero(rs.getInt("linea_id"));
-                linea.setCantidad(rs.getInt("cantidad"));
-                linea.setDescuento(rs.getFloat("descuento"));
-
-                // Crear el producto y su categoría
-                Producto producto = new Producto();
-                producto.setId(rs.getString("producto_codigo"));
-                producto.setDescripcion(rs.getString("producto_descripcion"));
-                producto.setPrecio(rs.getFloat("precioUnitario"));
-
-                Categoria categoria = new Categoria();
-                categoria.setIdCategoria(rs.getString("categoria_id"));
-                categoria.setNombreCategoria(rs.getString("categoria_nombre"));
-
-                producto.setCategoria(categoria);
-                linea.setProducto(producto);
-
-                // Añadir la línea a la factura
-                factura.getLineas().add(linea);
-            }
         }
         return facturas;
     }

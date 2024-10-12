@@ -16,28 +16,40 @@ public class ProductoDao {
         db = Database.instance();
     }
 
+
     public void create(Producto e) throws Exception {
-        String sql = "insert into " +
-                "Producto " +
-                "(codigo , nombre, descripcion, unidadMedida,precioUnitario,existencias, categoria) " +
-                "values(?,?,?,?,?)";
-        PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, e.getId());
-        stm.setString(2, e.getNombre());
-        stm.setString(3, e.getDescripcion());
-        stm.setString(4, e.getUnidadMedida());
-        stm.setDouble(5, e.getPrecio());
-        stm.setInt(6,    e.getExistencias());
-        stm.setString(7, e.getCategoria().getIdCategoria());
-        db.executeUpdate(stm);
+        String sql = "INSERT INTO Producto " +
+                "(codigo, nombre, descripcion, unidadMedida, precioUnitario, existencias, categoria) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            // Validación de campos antes de insertar
+            if (e.getId() == null || e.getNombre() == null || e.getCategoria() == null) {
+                throw new Exception("Datos del producto incompletos.");
+            }
+
+            // Configuración de valores en el PreparedStatement
+            stm.setString(1, e.getId());
+            stm.setString(2, e.getNombre());
+            stm.setString(3, e.getDescripcion());
+            stm.setString(4, e.getUnidadMedida());
+            stm.setDouble(5, e.getPrecio());
+            stm.setInt(6, e.getExistencias());
+            stm.setString(7, e.getCategoria().getIdCategoria());
+
+            // Ejecutar la inserción
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            throw new Exception("Error al crear el producto: " + ex.getMessage(), ex);
+        }
     }
+
 
     public Producto read(String codigo) throws Exception {
         String sql = "select " +
                 "* " +
                 "from  Producto t " +
                 "inner join Categoria c on t.categoria=c.id " +
-                "where t.codigo?";
+                "where t.codigo=?";
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setString(1, codigo);
         ResultSet rs = db.executeQuery(stm);
@@ -68,7 +80,6 @@ public class ProductoDao {
         if (count == 0) {
             throw new Exception("Producto NO EXISTE");
         }
-
     }
 
     public void delete(Producto e) throws Exception {
