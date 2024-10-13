@@ -47,6 +47,11 @@ public class View implements PropertyChangeListener {
                 try {
                     Cliente filter = new Cliente();
                     filter.setNombre(BuscarNombreTxtField.getText());
+                    System.out.println("Buscando cliente con nombre: " + filter.getNombre());
+                    if (filter.getNombre().trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(panel, "Por favor, ingresa un nombre para buscar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                        return; // Salir del método si el campo está vacío
+                    }
                     controller.search(filter);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(panel, ex.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);

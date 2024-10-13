@@ -19,12 +19,14 @@ import pos.Application;
 import pos.logic.Cliente;
 import pos.logic.Service;
 
+import java.util.List;
+
 public class Controller {
     View view;
     Model model;
 
-    public Controller(View view, Model model) {
-        model.init(Service.instance().search(new Cliente()));
+    public Controller(View view, Model model) throws Exception {
+        model.init(Service.instance().obtenerTodosClientes());
         this.view = view;
         this.model = model;
         view.setController(this);
@@ -36,6 +38,17 @@ public class Controller {
         model.setMode(Application.MODE_CREATE);
         model.setCurrent(new Cliente());
         model.setList(Service.instance().search(model.getFilter()));
+        System.out.println("Resultados encontrados: ");
+        //Quitar, verificación
+        List<Cliente> resultados = Service.instance().search(model.getFilter());
+        if (resultados.isEmpty()) {
+            System.out.println("No se encontraron clientes con ese nombre.");
+        } else {
+            for (Cliente c : resultados) {
+                System.out.println("Cliente encontrado: " + c.getNombre());
+            }
+        }
+
     }
 
     public void save(Cliente e) throws  Exception{

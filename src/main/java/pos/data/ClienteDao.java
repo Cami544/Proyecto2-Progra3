@@ -1,32 +1,46 @@
 package pos.data;
 
+import pos.logic.Cajero;
 import pos.logic.Cliente;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClienteDao {
-    Database db = new Database();
+    Database db;
 
     public ClienteDao() {
-        db = new Database();
+        db = Database.instance();
+        if (db == null) {
+            System.err.println("No se pudo establecer la conexión con la base de datos.");
+        } else {
+            System.out.println("Conexión con la base de datos establecida.");
+        }
     }
 
     public void create(Cliente cliente) throws Exception {
-        String sql = "insert into " +
-                "Cliente " +
-                "(id, nombre, telefono, email, descuento) " +
-                "values (?,?,?,?,?) ";
-        PreparedStatement stmt = db.prepareStatement(sql);
-        stmt.setString(1, cliente.getId());
-        stmt.setString(2, cliente.getNombre());
-        stmt.setString(3, cliente.getTelefono());
-        stmt.setString(4, cliente.getEmail());
-        stmt.setDouble(5, cliente.getDescuento());
-        db.executeUpdate(stmt);
+        String sql = "INSERT INTO Cliente (id, nombre, telefono, email, descuento) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = db.prepareStatement(sql)) {
+            System.out.println("Creando cliente: " + stmt);
+
+            // Validación de campos antes de insertar
+            if (cliente.getId() == null || cliente.getNombre() == null || cliente.getTelefono() == null || cliente.getEmail() == null) {
+                throw new Exception("Datos del cliente incompletos.");
+            }
+            stmt.setString(1, cliente.getId());
+            stmt.setString(2, cliente.getNombre());
+            stmt.setString(3, cliente.getTelefono());
+            stmt.setString(4, cliente.getEmail());
+            stmt.setDouble(5, cliente.getDescuento());
+            db.executeUpdate(stmt);
+        } catch (SQLException ex) {
+            throw new Exception("Error al crear cliente: " + ex.getMessage(), ex);
+        }
     }
+
 
     public Cliente read(String id) throws Exception {
         String sql = "select * from Cliente where id = ?";
@@ -67,7 +81,7 @@ public class ClienteDao {
     public void update(Cliente e) throws Exception {
         String sql = "update " +
                 "Cliente " +
-                "set id=?, nombre=?, telefono=?, email=? , descuento =?" +
+                "nombre=?, telefono=?, email=? , descuento =?" +
                 "where id=?";
         PreparedStatement stm = db.prepareStatement(sql);
         stm.setString(1, e.getId());
@@ -75,7 +89,6 @@ public class ClienteDao {
         stm.setString(3, e.getTelefono());
         stm.setString(4, e.getEmail());
         stm.setFloat(5, e.getDescuento());
-        stm.setString(6, e.getId());
         int count = db.executeUpdate(stm);
         if (count == 0) {
             throw new Exception("Cliente NO EXISTE");
@@ -97,16 +110,16 @@ public class ClienteDao {
 
     public List<Cliente> search(Cliente e) throws Exception {
         List<Cliente> resultado = new ArrayList<Cliente>();
-        String sql = "select * from Cliente where id = ? order by id";
-        PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, e.getId()); // Busqueda exacta por el ID del cliente (que es un String)
-        ResultSet rs = stm.executeQuery(); // Ejecutar la consulta
-
-        while (rs.next()) {
-            Cliente c = from(rs); // Construye el objeto Cliente desde el ResultSet
-            resultado.add(c); // Añade el cliente a la lista de resultados
+        String sql = "select * from Cliente where nombre LIKE ? order by nombre";
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            stm.setString(1, "%" + e.getNombre() + "%");
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    Cliente c = from(rs);
+                    resultado.add(c);
+                }
+            }
         }
-
         return resultado;
     }
 
@@ -114,17 +127,23 @@ public class ClienteDao {
         List<Cliente> clientes = new ArrayList<>();
         String sql = "SELECT * FROM Cliente";
 
-        // Usar try-with-resources para asegurar el cierre de los recursos
         try (PreparedStatement stm = db.prepareStatement(sql);
              ResultSet rs = stm.executeQuery()) { // Ejecutar la consulta
             while (rs.next()) {
                 Cliente c = from(rs); // Convertir el ResultSet en un objeto Cliente
                 clientes.add(c); // Agregar el Cliente a la lista
             }
-        } // El PreparedStatement y el ResultSet se cierran automáticamente aquí
+            if (clientes.isEmpty()) {
+                System.out.println("No se encontraron clientes.");
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error al obtener clientes: " + ex.getMessage());
+            throw new Exception("Error al obtener clientes", ex);
+        }
 
         return clientes; // Retornar la lista de Clientes
     }
+
 
     public Cliente from(ResultSet rs) throws Exception {
         Cliente c = new Cliente();

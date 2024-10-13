@@ -19,12 +19,19 @@ import pos.logic.Cajero;
 import pos.logic.Cliente;
 import pos.logic.Service;
 
+import java.util.List;
+
 public class Controller {
     View view;
     Model model;
 
     public Controller(View view, Model model) {
-        model.init(Service.instance().search(new Cajero()));
+        try {
+            model.init(Service.instance().obtenerTodosCajeros());  // Inicializa el modelo con la lista de cajeros
+        } catch (Exception e) {
+            System.err.println("Error inicializando la lista de cajeros: " + e.getMessage());
+        }
+       // model.init(Service.instance().search(new Cajero()));
         this.view = view;
         this.model = model;
         view.setController(this);
@@ -36,6 +43,7 @@ public class Controller {
         model.setMode(Application.MODE_CREATE);
         model.setCurrent(new Cajero());
         model.setList(Service.instance().search(model.getFilter()));
+        System.out.println("Resultados encontrados: ");
     }
 
     public void save(Cajero e) throws  Exception{

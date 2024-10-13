@@ -1,7 +1,7 @@
 package pos.logic;
 
 import java.util.Objects;
-//sin xml
+
 public class Cliente {
     String id;
     String nombre;

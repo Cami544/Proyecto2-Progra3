@@ -61,7 +61,6 @@ public class Model extends AbstractModel {
     public int getMode() {
         return mode;
     }
-
     public void setMode(int mode) {
         this.mode = mode;
     }
@@ -69,6 +68,4 @@ public class Model extends AbstractModel {
     public static final String LIST="list";
     public static final String CURRENT="current";
     public static final String FILTER="filter";
-
-
 }

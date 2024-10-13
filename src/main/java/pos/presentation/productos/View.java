@@ -61,6 +61,7 @@ public class View implements PropertyChangeListener {
                 try {
                     Producto filter = new Producto();
                     filter.setNombre(BuscarNombreTxtField.getText());
+                    System.out.println("Buscando producto con nombre: " + filter.getNombre());
                     controller.search(filter);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(panel1, ex.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);

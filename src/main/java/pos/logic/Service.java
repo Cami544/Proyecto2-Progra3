@@ -142,8 +142,11 @@ public class Service {
 
     public List<Cajero> search(Cajero e) {
         try {
+            System.out.println("buscando cajero" );
             return cajerosDao.search(e);
+
         } catch (Exception ex) {
+            System.out.println("no encontrado en daoCajero" );
             throw new RuntimeException(ex);
         }
     }

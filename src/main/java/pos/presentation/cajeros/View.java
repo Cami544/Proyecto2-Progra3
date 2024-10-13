@@ -41,6 +41,7 @@ public class View implements PropertyChangeListener {
                 try {
                     Cajero filter = new Cajero();
                     filter.setNombre(BuscarNombreTxtField.getText());
+                    System.out.println("Buscando cajero con nombre: " + filter.getNombre());
                     controller.search(filter);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(panel, ex.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);
@@ -67,7 +68,9 @@ public class View implements PropertyChangeListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = list.getSelectedRow();
-                controller.edit(row);
+                if (row >= 0) {
+                    controller.edit(row);
+                }
             }
         });
 
@@ -156,7 +159,7 @@ public class View implements PropertyChangeListener {
                 list.setModel(new TableModel(cols, model.getList()));
                 list.setRowHeight(30);
                 TableColumnModel columnModel = list.getColumnModel();
-                columnModel.getColumn(1).setPreferredWidth(150);
+                columnModel.getColumn(0).setPreferredWidth(150);
                 columnModel.getColumn(1).setPreferredWidth(150);
                 break;
             case Model.CURRENT:

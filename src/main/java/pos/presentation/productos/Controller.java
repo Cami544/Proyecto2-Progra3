@@ -26,8 +26,8 @@ public class Controller {
     View view;
     Model model;
 
-    public Controller(View view, Model model) {
-        model.init(Service.instance().search(new Producto()));
+    public Controller(View view, Model model) throws Exception {
+        model.init(Service.instance().obtenerTodosProductos());
         this.view = view;
         this.model = model;
         view.setController(this);
@@ -39,6 +39,7 @@ public class Controller {
         model.setMode(Application.MODE_CREATE);
         model.setCurrent(new Producto());
         model.setList(Service.instance().search(model.getFilter()));
+        System.out.println("Resultados encontrados: ");
     }
 
     public void save(Producto e) throws  Exception{

@@ -45,23 +45,23 @@ public class ProductoDao {
 
 
     public Producto read(String codigo) throws Exception {
-        String sql = "select " +
-                "* " +
-                "from  Producto t " +
-                "inner join Categoria c on t.categoria=c.id " +
-                "where t.codigo=?";
-        PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, codigo);
-        ResultSet rs = db.executeQuery(stm);
-        CategoriaDao categoriaDao=new CategoriaDao();
-        if (rs.next()) {
-            Producto r = from(rs, "t");
-            r.setCategoria(categoriaDao.from(rs, "c"));
-           return r;
-        } else {
-            throw new Exception("Producto NO EXISTE");
+        String sql = "SELECT * FROM Producto t " +
+                "INNER JOIN Categoria c ON t.categoria = c.id " +
+                "WHERE t.codigo = ?";
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            stm.setString(1, codigo);
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    Producto r = from(rs, "t");
+                    r.setCategoria(new CategoriaDao().from(rs, "c"));
+                    return r;
+                } else {
+                    throw new Exception("Producto NO EXISTE");
+                }
+            }
         }
     }
+
 
     public void update(Producto e) throws Exception {
         String sql = "update " +
@@ -100,9 +100,9 @@ public class ProductoDao {
                 "from " +
                 "Producto t " +
                 "inner join Categoria c on t.categoria=c.id " +
-                "where t.descripcion like ? order by t.descripcion";
+                "where t.nombre LIKE ? order by t.nombre";
         PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, "%" + e.getDescripcion() + "%");
+        stm.setString(1, "%" + e.getNombre() + "%");
         ResultSet rs = db.executeQuery(stm);
         CategoriaDao categoriaDao=new CategoriaDao();
         while (rs.next()) {
