@@ -73,8 +73,10 @@ public class Service {
 
     public Producto buscarProductoPorId(String id) throws Exception{
         try{
+            System.out.println("Buscando  producto, service" );
             return productoDao.buscarProductoPorId(id);
         }catch(Exception ex){
+            System.out.println("no encontrado producto, service" );
             throw new RuntimeException(ex);
         }
     }

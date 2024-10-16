@@ -21,7 +21,7 @@ import java.awt.event.*;
 public class View implements PropertyChangeListener {
     private JLabel BuscarNombreLbl;
     private JTextField buscarProductoTxtField;
-    private JButton search;
+    private JButton agregarButton;
     private JTable listLineas;
     private JComboBox<Cliente> clientes;
     private JComboBox<Cajero> cajeros;
@@ -66,7 +66,7 @@ public class View implements PropertyChangeListener {
 
     public View() {
 
-        search.addActionListener(new ActionListener() {
+        agregarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String productId = buscarProductoTxtField.getText();
@@ -75,7 +75,7 @@ public class View implements PropertyChangeListener {
                         controller.buscarProductoPorCodigo(productId);
                         controller.updateTotales();
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        throw new RuntimeException("Error al agregar producto: " + ex.getMessage());
                     }
                 } else {
                     JOptionPane.showMessageDialog(panel, "Por favor, ingrese un ID de producto.", "Error", JOptionPane.ERROR_MESSAGE);

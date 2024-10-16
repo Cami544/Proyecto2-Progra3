@@ -139,6 +139,7 @@ public class ProductoDao {
         if (rs.next()) {
             Producto r = from(rs, "t");
             r.setCategoria(categoriaDao.from(rs, "c"));
+            System.out.println("Producto encontrado en ProducotDao ID: " + r.getId() );
             return r;
         } else {
             // Aqui se lanza una excepción si no se encuentra el producto

@@ -87,52 +87,56 @@ public class Controller {
     }
 
     public void buscarProductoPorCodigo(String id) throws Exception {
-        if (id != null && !id.trim().isEmpty()) {
-            try {
-                Producto producto = Service.instance().buscarProductoPorId(id);
-                if (producto != null) {
-                    Factura facturaActual = model.getCurrent();
-                    boolean existeProd = false;
-
-
-                    for (int i = 0; i < facturaActual.getLineas().size(); i++) {
-                        Linea linea = facturaActual.getLineas().get(i);
-                        if (linea.getProducto().getId().equals(id)) {
-                            int cantnueva = linea.getCantidad() + 1;
-
-                            if (producto.getExistencias() >= cantnueva) {
-                                linea.setCantidad(cantnueva);
-                                ((TableModel) view.getListLineas().getModel()).updateLinea(i);
-                                existeProd = true;
-                                break;
-                            } else {
-                                JOptionPane.showMessageDialog(view.getPanel(), "No contamos con suficientes unidades de este producto: " + producto.getNombre(), "Error", JOptionPane.ERROR_MESSAGE);
-                                return;
-                            }
-                        }
-                    }
-
-                    if (!existeProd) {
-                        int numeroLinea = facturaActual.getLineas().size() + 1;
-                        String numeroLineaa= facturaActual.getNumero()+"-"+numeroLinea;
-                        if (producto.getExistencias() >= 1) {
-                            Linea nuevaLinea = new Linea(Integer.parseInt(numeroLineaa), producto, facturaActual, 1, 0);
-                            facturaActual.getLineas().add(nuevaLinea);
-                            ((TableModel) view.getListLineas().getModel()).addLinea(nuevaLinea);
-                        } else {
-                            JOptionPane.showMessageDialog(view.getPanel(), "No contamos con suficientes unidades de este producto: " + producto.getNombre(), "Error", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(view.getPanel(), "Producto no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(view.getPanel(), "Error al buscar el producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        // Validación de que el ID no sea nulo o vacío
+        if (id == null || id.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(view.getPanel(),
+                    "El campo de ID del producto es obligatorio.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            Producto producto = Service.instance().buscarProductoPorId(id);
+            if (producto == null) {
+                JOptionPane.showMessageDialog(view.getPanel(), "Producto no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        } else {
-            JOptionPane.showMessageDialog(view.getPanel(), "El campo de ID del producto es obligatorio.", "Error", JOptionPane.ERROR_MESSAGE);
+            Factura facturaActual = model.getCurrent();
+            List<Linea> lineas = facturaActual.getLineas();  // Mejor rendimiento
+
+            boolean existeProd = false;
+            for (int i = 0; i < lineas.size(); i++) {
+                Linea linea = lineas.get(i);
+                if (linea.getProducto().getId().equals(id)) {
+                    int cantNueva = linea.getCantidad() + 1;
+
+                    if (producto.getExistencias() >= cantNueva) {
+                        linea.setCantidad(cantNueva);
+                        ((TableModel) view.getListLineas().getModel()).updateLinea(i);
+                        existeProd = true;
+                    } else {
+                        JOptionPane.showMessageDialog(view.getPanel(),
+                                "No contamos con suficientes unidades de este producto: " + producto.getNombre(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    break;
+                }
+            }
+            if (!existeProd) {
+                if (producto.getExistencias() >= 1) {
+                    int numeroLinea = lineas.size() + 1;
+                    String numeroLineaa = String.format("%s-%d", facturaActual.getNumero(), numeroLinea);
+                    Linea nuevaLinea = new Linea( Integer.parseInt(numeroLineaa), producto, facturaActual, 1, 0);
+                    lineas.add(nuevaLinea);
+                    ((TableModel) view.getListLineas().getModel()).addLinea(nuevaLinea);
+                } else {
+                    JOptionPane.showMessageDialog(view.getPanel(),
+                            "No contamos con suficientes unidades de este producto: " + producto.getNombre(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(view.getPanel(), "Error al buscar el producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     public List<Producto> buscaProductoConNombre(String nombre) throws Exception {
         List<Producto> productos = Service.instance().obtenerTodosProductos();
