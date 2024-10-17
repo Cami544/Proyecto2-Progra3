@@ -64,19 +64,19 @@ public class ProductoDao {
 
 
     public void update(Producto e) throws Exception {
-        String sql = "update " +
-                "Producto " +
-                "set nombre=?, descripcion=?, unidadMedida=?, precioUnitario=?, existencias=?, categoria=? " +
-                "where codigo=?";
+        String sql = "UPDATE Producto " +
+                "SET nombre = ?, descripcion = ?, unidadMedida = ?, precioUnitario = ?, existencias = ?, categoria = ? " +
+                "WHERE codigo = ?";
         PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, e.getId());
-        stm.setString(2, e.getNombre());
-        stm.setString(3, e.getDescripcion());
-        stm.setString(4, e.getUnidadMedida());
-        stm.setDouble(5, e.getPrecio());
-        stm.setInt(6, e.getExistencias());
-        stm.setString(7, e.getCategoria().getIdCategoria()); //Revisar esta
-        int count = db.executeUpdate(stm);
+        stm.setString(1, e.getNombre());        // Establecer nombre
+        stm.setString(2, e.getDescripcion());   // Establecer descripción
+        stm.setString(3, e.getUnidadMedida());  // Establecer unidad de medida
+        stm.setDouble(4, e.getPrecio());        // Establecer precio unitario
+        stm.setInt(5, e.getExistencias());      // Establecer existencias
+        stm.setString(6, e.getCategoria().getIdCategoria());  // Establecer categoría (suponiendo que `getIdCategoria` devuelve un String)
+        stm.setString(7, e.getId());            // Establecer código (ID del producto) para la cláusula WHERE
+
+        int count = stm.executeUpdate();  // Ejecutar la actualización
         if (count == 0) {
             throw new Exception("Producto NO EXISTE");
         }

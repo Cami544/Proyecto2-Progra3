@@ -79,22 +79,21 @@ public class ClienteDao {
 
 
     public void update(Cliente e) throws Exception {
-        String sql = "update " +
-                "Cliente " +
-                "nombre=?, telefono=?, email=? , descuento =?" +
-                "where id=?";
+        String sql = "UPDATE Cliente SET " +
+                "nombre = ?, telefono = ?, email = ?, descuento = ? " +
+                "WHERE id = ?";
         PreparedStatement stm = db.prepareStatement(sql);
-        stm.setString(1, e.getId());
-        stm.setString(2, e.getNombre());
-        stm.setString(3, e.getTelefono());
-        stm.setString(4, e.getEmail());
-        stm.setFloat(5, e.getDescuento());
-        int count = db.executeUpdate(stm);
+        stm.setString(1, e.getNombre());  // Primero el nombre
+        stm.setString(2, e.getTelefono());  //  teléfono
+        stm.setString(3, e.getEmail());  //  email
+        stm.setFloat(4, e.getDescuento());  //  descuento
+        stm.setString(5, e.getId());  // Finalmente el ID en la clausula WHERE
+        int count = stm.executeUpdate();  // usar executeUpdate directamente en el PreparedStatement
         if (count == 0) {
             throw new Exception("Cliente NO EXISTE");
         }
-
     }
+
 
     public void delete(Cliente e) throws Exception {
         String sql = "delete " +

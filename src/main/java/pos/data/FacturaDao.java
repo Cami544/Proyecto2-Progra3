@@ -239,18 +239,20 @@ public class FacturaDao {
         float total = 0;
         String sql = "SELECT SUM(l.total) AS total_ventas " +
                 "FROM Factura f " +
-                "JOIN Linea l ON f.id = l.factura_id " + // Ajusta el nombre de la columna de relación
-                "WHERE l.producto_categoria_id = ? AND " + // Asumiendo que tienes un campo para la relación de categorías
+                "JOIN Linea l ON f.id = l.factura " +
+                "JOIN Producto p ON l.producto = p.id " +  // Relacionar Linea con Producto
+                "JOIN Categoria ca ON p.categoria = ca.id " + // Relacionar Producto con Categoria
+                "WHERE ca.id = ? AND " +  // Filtrar por la categoría
                 "YEAR(f.fecha) = ? AND MONTH(f.fecha) = ?";
 
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, c.getIdCategoria());
-            stm.setInt(2, anio);
-            stm.setInt(3, mes);
+            stm.setString(1, c.getIdCategoria()); // Establecer el ID de la categoría
+            stm.setInt(2, anio);                  // Establecer el año
+            stm.setInt(3, mes);                   // Establecer el mes
 
             try (ResultSet rs = stm.executeQuery()) {
                 if (rs.next()) {
-                    total = rs.getFloat("total_ventas"); // Obtiene el total de ventas
+                    total = rs.getFloat("total_ventas"); // Obtener el total de ventas
                 }
             }
         } catch (SQLException ex) {
@@ -259,6 +261,7 @@ public class FacturaDao {
 
         return total;
     }
+
 
     public Factura from(ResultSet rs) throws Exception {
         Factura factura = new Factura();
