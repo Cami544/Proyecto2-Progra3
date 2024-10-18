@@ -20,8 +20,9 @@ public class LineaDao {
     public void create(Linea e) throws Exception {
         String sql = "INSERT INTO Linea (producto, factura, cantidad, descuento) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, e.getProducto().getId());
-            stm.setInt(2, e.getFactura().getNumero());
+            // Asignacion de valores para las llaves foraneas
+            stm.setString(1, e.getProducto().getId());  // Llave foranea a Producto (debe existir en la tabla Producto)
+            stm.setInt(2, e.getFactura().getNumero());  // Llave foranea a Factura (debe existir en la tabla Factura)
             stm.setInt(3, e.getCantidad());
             stm.setFloat(4, e.getDescuento());
 
@@ -30,9 +31,15 @@ public class LineaDao {
                 throw new Exception("No se insertó ninguna línea en la base de datos.");
             }
         } catch (SQLException ex) {
-            throw new Exception("Error al insertar la línea", ex);
+            // revisar el error SQL específico para saber si fue por llaves foráneas
+            if (ex.getSQLState().equals("23000")) {  // 23000 es el codigo para errores de integridad referencial
+                throw new Exception("Error: Las llaves foraneas no coinciden con registros existentes.", ex);
+            } else {
+                throw new Exception("Error al insertar la linea", ex);
+            }
         }
     }
+
 
     public List<Linea> readByFactura(int numeroFactura) throws Exception {
         List<Linea> lineas = new ArrayList<>();

@@ -2,10 +2,7 @@ package pos.data;
 
 import pos.logic.*;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +19,36 @@ public class FacturaDao {
     public void create(Factura e) throws Exception {
         // Primero, se inserta la factura en la base de datos
         String sql = "INSERT INTO Factura (cliente, cajero, fecha) VALUES (?, ?, ?)";
-        PreparedStatement stm = db.prepareStatement(sql);
 
-        // Asignar los valores a los parámetros del PreparedStatement
-        stm.setString(1, e.getCliente().getId()); // ID del cliente
-        stm.setString(2, e.getCajero().getId()); // ID del cajero
-        stm.setDate(3, Date.valueOf(e.getFecha().format(DateTimeFormatter.ISO_DATE))); // Convertir LocalDate a Date
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            // Asignar los valores a los parámetros del PreparedStatement
+            stm.setString(1, e.getCliente().getId()); // ID del cliente
+            stm.setString(2, e.getCajero().getId()); // ID del cajero
+            stm.setDate(3, Date.valueOf(e.getFecha().format(DateTimeFormatter.ISO_DATE))); // Convertir LocalDate a Date
 
-        // Ejecutar la actualización para insertar la factura
-        int numero = db.executeUpdate(stm);
-        e.setNumero(numero);
+            // Ejecutar la actualización para insertar la factura
+            int affectedRows = stm.executeUpdate();
+            if (affectedRows == 0) {
+                throw new Exception("No se pudo insertar la factura.");
+            }
+
+            // Recuperar el último ID generado
+            String sqlLastId = "SELECT LAST_INSERT_ID()";
+            try (Statement stmLastId = db.createStatement();
+                 ResultSet rs = stmLastId.executeQuery(sqlLastId)) {
+                if (rs.next()) {
+                    int numero = rs.getInt(1);  // Obtener el número de factura generado
+                    e.setNumero(numero);  // Asignar el número de factura generado
+                } else {
+                    throw new Exception("No se pudo obtener el número de la factura.");
+                }
+            }
+        } catch (SQLException ex) {
+            throw new Exception("Error al insertar la factura", ex);
+        }
     }
+
+
     public Factura read(int numeroFactura) throws Exception {
         String sql = "SELECT * " +
                 "FROM Factura f " +

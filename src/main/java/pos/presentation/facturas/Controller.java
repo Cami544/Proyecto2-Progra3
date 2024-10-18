@@ -100,6 +100,7 @@ public class Controller {
                 JOptionPane.showMessageDialog(view.getPanel(), "Producto no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
             Factura facturaActual = model.getCurrent();
             List<Linea> lineas = facturaActual.getLineas();  // Mejor rendimiento
 
@@ -120,11 +121,11 @@ public class Controller {
                     break;
                 }
             }
+
             if (!existeProd) {
                 if (producto.getExistencias() >= 1) {
-                    int numeroLinea = lineas.size() + 1;
-                    String numeroLineaa = String.format("%s-%d", facturaActual.getNumero(), numeroLinea);
-                    Linea nuevaLinea = new Linea( Integer.parseInt(numeroLineaa), producto, facturaActual, 1, 0);
+                    int numeroLinea = lineas.size() + 1;  // Solo el número de línea
+                    Linea nuevaLinea = new Linea(numeroLinea, producto, facturaActual, 1, 0);  // El número de línea es un entero
                     lineas.add(nuevaLinea);
                     ((TableModel) view.getListLineas().getModel()).addLinea(nuevaLinea);
                 } else {
@@ -136,6 +137,7 @@ public class Controller {
             JOptionPane.showMessageDialog(view.getPanel(), "Error al buscar el producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
 
     public List<Producto> buscaProductoConNombre(String nombre) throws Exception {

@@ -110,4 +110,14 @@ public class Database {
             throw new Exception("ERROR DE BASE DE DATOS Query");
         }
     }
+    public Statement createStatement() throws Exception {
+        try {
+            return cnx.createStatement();
+        } catch (SQLException e) {
+            throw new Exception("ERROR DE BASE DE DATOS Create Statement");
+        }
+    }
+
+
+
 }
