@@ -344,36 +344,26 @@ public class View implements PropertyChangeListener {
 
     public Factura take() {
         Factura factura = new Factura();
-       try {
-            // Obtiene el siguiente número de factura desde la base de datos
+        try {
             int siguienteNumero = Service.instance().obtenerSiguienteNumeroFactura();
             factura.setNumero(siguienteNumero);
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener el número de factura", e);
         }
-
         Cliente clienteSeleccionado = (Cliente) clientes.getSelectedItem();
         Cajero cajeroSeleccionado = (Cajero) cajeros.getSelectedItem();
-
         factura.setCajero(cajeroSeleccionado);
         factura.setCliente(clienteSeleccionado);
         factura.setFecha(LocalDate.now());
-
-        TableModel tableModel = (TableModel) listLineas.getModel();
         List<Linea> lineas = new ArrayList<>();
+        TableModel tableModel = (TableModel) listLineas.getModel();
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             Linea linea = tableModel.getLineaAt(i);
             lineas.add(linea);
-            try {
-                controller.saveLinea(linea);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
         }
         factura.setLineas(lineas);
         return factura;
     }
-
 
 
     public class SearchDialog extends JDialog {

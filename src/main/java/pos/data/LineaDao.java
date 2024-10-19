@@ -16,44 +16,31 @@ public class LineaDao {
 
     public LineaDao() {db = Database.instance();}
 
-    // Método para crear una nueva línea de factura
     public Linea create(Linea e) throws Exception {
-        String sql = "INSERT INTO Linea (producto, factura, cantidad, descuento) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO linea (producto, factura, cantidad, descuento) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stm = db.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            // Asignar valores a los parámetros del PreparedStatement
-            stm.setString(1, e.getProducto().getId());  // Llave foránea a Producto
-            stm.setInt(2, e.getFactura().getNumero());  // Llave foránea a Factura
+            stm.setString(1, e.getProducto().getId());
+            stm.setInt(2, e.getFactura().getNumero());  // Número de la factura a la que pertenece
             stm.setInt(3, e.getCantidad());
             stm.setFloat(4, e.getDescuento());
 
-            // Ejecutar la inserción y verificar si fue exitosa
-            int count = stm.executeUpdate();
-            if (count == 0) {
-                throw new Exception("No se insertó ninguna línea en la base de datos.");
+            int affectedRows = stm.executeUpdate();
+            if (affectedRows == 0) {
+                throw new Exception("No se pudo insertar la línea.");
             }
 
-            // Obtener el número de línea auto-generado por la base de datos
             try (ResultSet generatedKeys = stm.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     e.setNumero(generatedKeys.getInt(1));  // Asignar el número de línea generado
-                    System.out.println("Línea insertada correctamente con número: " + e.getNumero());  // Registro para depuración
                 } else {
                     throw new Exception("No se pudo obtener el número de la línea.");
                 }
             }
-
-            return e;  // Retornar la línea con el número generado
+            return e;
         } catch (SQLException ex) {
-            // Manejo del error específico de integridad referencial
-            if (ex.getSQLState().equals("23000")) {  // Código de error de integridad referencial
-                throw new Exception("Error: Las llaves foráneas no coinciden con registros existentes.", ex);
-            } else {
-                throw new Exception("Error al insertar la línea", ex);
-            }
+            throw new Exception("Error al insertar la línea.", ex);
         }
     }
-
-
 
     // Leer todas las líneas de una factura específica
     public List<Linea> readByFactura(int numeroFactura) throws Exception {
@@ -63,11 +50,9 @@ public class LineaDao {
                 "INNER JOIN Producto p ON l.producto = p.codigo " +
                 "INNER JOIN Categoria c ON p.categoria = c.id " +
                 "WHERE l.factura = ?";
-
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             stm.setInt(1, numeroFactura);
             ResultSet rs = db.executeQuery(stm);
-
             while (rs.next()) {
                 Linea linea = from(rs, "l");  // Reutilizar el método `from`
                 lineas.add(linea);
@@ -94,6 +79,21 @@ public class LineaDao {
                 throw new Exception("Línea NO EXISTE");
             }
         }
+    }
+    public boolean facturaExiste(int numeroFactura) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Factura WHERE numero = ?";
+
+        try (PreparedStatement stm = db.prepareStatement(sql)) {
+            stm.setInt(1, numeroFactura);
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return false;
     }
 
     // Actualizar una línea

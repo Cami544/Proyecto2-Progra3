@@ -39,26 +39,27 @@ public class Controller {
     public void saveFactura(Factura e) throws Exception {
         switch (model.getMode()) {
             case Application.MODE_CREATE:
-                Service.instance().create(e);
+                Service.instance().create(e);  // Crear nueva factura
                 break;
             case Application.MODE_EDIT:
-                Service.instance().update(e);
+                Service.instance().update(e);  // Actualizar factura existente
                 break;
+            default:
+                throw new IllegalStateException("Modo no reconocido: " + model.getMode());
         }
         model.setFilter(new Factura());
-        search(model.getFilter());
+        search(model.getFilter());  // Actualizar la vista tras guardar la factura
     }
 
     public void saveLinea(Linea e) throws Exception {
         Linea lineaGuardada;  // Variable para guardar la línea creada o actualizada
         switch (model.getMode()) {
             case Application.MODE_CREATE:
-                // Capturar la línea devuelta por el servicio con el número asignado
-                lineaGuardada = Service.instance().create(e);
+                lineaGuardada = Service.instance().create(e);  // Crear la línea
                 break;
             case Application.MODE_EDIT:
-                Service.instance().update(e);
-                lineaGuardada = e;  // En el modo de edición, no se requiere recapturar la línea
+                Service.instance().update(e);  // Actualizar la línea existente
+                lineaGuardada = e;
                 break;
             default:
                 throw new IllegalStateException("Modo no reconocido: " + model.getMode());
@@ -68,7 +69,6 @@ public class Controller {
             lineas.add(lineaGuardada);  // Agregar la línea recién creada a la lista
             ((TableModel) view.getListLineas().getModel()).addLinea(lineaGuardada);
         } else {
-            // Si es una actualización, deberías asegurarte de reflejar los cambios en la vista
             int index = lineas.indexOf(e);
             lineas.set(index, lineaGuardada);  // Actualizar la línea existente
             ((TableModel) view.getListLineas().getModel()).updateLinea(index);

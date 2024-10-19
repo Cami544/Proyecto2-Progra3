@@ -97,20 +97,36 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `factura`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
+
 CREATE TABLE `factura` (
-  `numero` int NOT NULL AUTO_INCREMENT,
-  `cliente` varchar(50) NOT NULL,
-  `cajero` varchar(50) NOT NULL,
-  `fecha` date NOT NULL,
-  `lineas` int DEFAULT NULL,
-  PRIMARY KEY (`numero`),
-  KEY `cliente` (`cliente`),
-  KEY `cajero` (`cajero`),
-  KEY `lineas` (`lineas`),
-  CONSTRAINT `factura_ibfk_1` FOREIGN KEY (`cliente`) REFERENCES `cliente` (`id`),
-  CONSTRAINT `factura_ibfk_2` FOREIGN KEY (`cajero`) REFERENCES `cajero` (`id`),
-  CONSTRAINT `factura_ibfk_3` FOREIGN KEY (`lineas`) REFERENCES `linea` (`numero`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                           `numero` int NOT NULL AUTO_INCREMENT,
+                           `cliente` varchar(50) NOT NULL,
+                           `cajero` varchar(50) NOT NULL,
+                           `fecha` date NOT NULL,
+
+                           PRIMARY KEY (`numero`),
+
+    -- Índices para mejorar consultas
+                           KEY `idx_cliente` (`cliente`),
+                           KEY `idx_cajero` (`cajero`),
+
+    -- Llaves foráneas
+                           CONSTRAINT `fk_factura_cliente`
+                               FOREIGN KEY (`cliente`)
+                                   REFERENCES `cliente` (`id`)
+                                   ON DELETE RESTRICT
+                                   ON UPDATE CASCADE,
+
+                           CONSTRAINT `fk_factura_cajero`
+                               FOREIGN KEY (`cajero`)
+                                   REFERENCES `cajero` (`id`)
+                                   ON DELETE RESTRICT
+                                   ON UPDATE CASCADE
+) ENGINE=InnoDB
+  AUTO_INCREMENT=3
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -125,32 +141,43 @@ UNLOCK TABLES;
 --
 -- Table structure for table `linea`
 --
-
 DROP TABLE IF EXISTS `linea`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
+
 CREATE TABLE `linea` (
-  `numero` int NOT NULL AUTO_INCREMENT,
-  `producto` varchar(50) NOT NULL,
-  `factura` int NOT NULL,
-  `cantidad` int NOT NULL,
-  `descuento` float unsigned DEFAULT '0',
-  PRIMARY KEY (`numero`),
-  KEY `linea_ibfk_1` (`factura`) /*!80000 INVISIBLE */,
-  KEY `linea_ibfk_2` (`producto`),
-  CONSTRAINT `linea_ibfk_1` FOREIGN KEY (`factura`) REFERENCES `factura` (`numero`),
-  CONSTRAINT `linea_ibfk_2` FOREIGN KEY (`producto`) REFERENCES `producto` (`codigo`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+`numero` int NOT NULL AUTO_INCREMENT,
+`producto` varchar(50) NOT NULL,
+`factura` int NOT NULL,
+`cantidad` int NOT NULL,
+`descuento` float unsigned DEFAULT '0',
+ PRIMARY KEY (`numero`),
+    -- Índices para mejorar las consultas con las llaves foráneas
+KEY `idx_factura` (`factura`),
+KEY `idx_producto` (`producto`),
+-- Llave foránea hacia 'factura', con ON DELETE CASCADE
+ CONSTRAINT `fk_linea_factura`
+ FOREIGN KEY (`factura`) REFERENCES `factura` (`numero`)
+ ON DELETE CASCADE
+ON UPDATE CASCADE,
+    -- Llave foránea hacia 'producto'
+ CONSTRAINT `fk_linea_producto`
+  FOREIGN KEY (`producto`)  REFERENCES `producto` (`codigo`)
+ ON DELETE RESTRICT
+ ON UPDATE CASCADE
+) ENGINE=InnoDB
+  AUTO_INCREMENT=15
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `linea`
---
-
+-- Si necesitas insertar datos, desactiva y activa las llaves para acelerar:
 LOCK TABLES `linea` WRITE;
 /*!40000 ALTER TABLE `linea` DISABLE KEYS */;
 /*!40000 ALTER TABLE `linea` ENABLE KEYS */;
 UNLOCK TABLES;
+
 
 --
 -- Table structure for table `producto`

@@ -86,7 +86,27 @@ public class Database {
             throw new Exception("ERROR DE BASE DE DATOS Prepared Statement", e);
         }
     }
+    // Método para habilitar/deshabilitar auto-commit
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+        cnx.setAutoCommit(autoCommit);
+    }
 
+    // Método para confirmar una transacción
+    public void commit() throws SQLException {
+        cnx.commit();
+    }
+
+    // Método para revertir una transacción
+    public void rollback() throws SQLException {
+        cnx.rollback();
+    }
+
+    // Método para cerrar la conexión
+    public void close() throws SQLException {
+        if (cnx != null && !cnx.isClosed()) {
+            cnx.close();
+        }
+    }
 
     public int executeUpdate(PreparedStatement statement) throws Exception {
         try {

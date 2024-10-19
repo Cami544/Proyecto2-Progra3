@@ -15,46 +15,52 @@ public class FacturaDao {
         lineaDao = new LineaDao(); // Inicializa la instancia de LineaDao
     }
     // Método para crear una nueva factura
+
     public void create(Factura e) throws Exception {
-        // Primero, insertar la factura en la base de datos
-        String sql = "INSERT INTO Factura (cliente, cajero, fecha) VALUES (?, ?, ?)";
+        String insertFacturaSQL = "INSERT INTO factura (cliente, cajero, fecha) VALUES (?, ?, ?)";
+        String insertLineaSQL = "INSERT INTO linea (producto, factura, cantidad, descuento) VALUES (?, ?, ?, ?)";
 
-        // Preparar el statement con la opción de devolver claves generadas
-        try (PreparedStatement stm = db.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            // Asignar los valores a los parámetros del PreparedStatement
-            stm.setString(1, e.getCliente().getId());  // ID del cliente
-            stm.setString(2, e.getCajero().getId());   // ID del cajero
-            stm.setDate(3, Date.valueOf(e.getFecha().format(DateTimeFormatter.ISO_DATE)));  // Convertir LocalDate a Date
+        try {
+            db.setAutoCommit(false);  // Iniciar la transacción
 
-            // Ejecutar la inserción y verificar si fue exitosa
-            int affectedRows = stm.executeUpdate();
-            if (affectedRows == 0) {
-                throw new Exception("No se pudo insertar la factura.");
-            }
-
-            // Recuperar el número de factura generado automáticamente
-            try (ResultSet generatedKeys = stm.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int numero = generatedKeys.getInt(1);  // Obtener el número de factura generado
-                    e.setNumero(numero);  // Asignar el número de factura generado
-                    System.out.println("Factura insertada correctamente con número: " + numero);  // Registro para depuración
-                } else {
-                    throw new Exception("No se pudo obtener el número de la factura.");
+            // 1. Insertar la factura
+            try (PreparedStatement stmFactura = db.prepareStatement(insertFacturaSQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                stmFactura.setString(1, e.getCliente().getId());
+                stmFactura.setString(2, e.getCajero().getId());
+                stmFactura.setDate(3, Date.valueOf(e.getFecha()));
+                int affectedRows = stmFactura.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new Exception("No se pudo insertar la factura.");
+                }
+                // 2. Obtener el número de la factura generada
+                try (ResultSet generatedKeys = stmFactura.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        e.setNumero(generatedKeys.getInt(1));  // Asignar número de la factura
+                    } else {
+                        throw new Exception("No se pudo obtener el número de la factura.");
+                    }
                 }
             }
+            // 3. Insertar las líneas asociadas a la factura
+            try (PreparedStatement stmLinea = db.prepareStatement(insertLineaSQL)) {
+                for (Linea linea : e.getLineas()) {
+                    stmLinea.setString(1, linea.getProducto().getId());
+                    stmLinea.setInt(2, e.getNumero());  // Asociar número de factura
+                    stmLinea.setInt(3, linea.getCantidad());
+                    stmLinea.setFloat(4, linea.getDescuento());
 
-            // Después de insertar la factura, insertar las líneas en la tabla 'Linea'
-            for (Linea linea : e.getLineas()) {
-                linea.setFactura(e);  // Asignar la factura a la línea
-                lineaDao.create(linea);  // Insertar la línea
+                    stmLinea.addBatch();  // Agregar la línea a un lote para ejecución
+                }
+                stmLinea.executeBatch();  // Ejecutar todas las inserciones en lote
             }
-
+            db.commit();  // Confirmar la transacción si todo salió bien
         } catch (SQLException ex) {
-            throw new Exception("Error al insertar la factura", ex);
+            db.rollback();  // Revertir la transacción en caso de error
+            throw new Exception("Error al insertar la factura y sus líneas", ex);
+        } finally {
+            db.setAutoCommit(true);  // Restaurar auto-commit
         }
     }
-
-
 
 
     public Factura read(int numeroFactura) throws Exception {
