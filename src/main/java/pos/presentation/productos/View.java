@@ -5,14 +5,11 @@ import pos.logic.Producto;
 import pos.logic.Service;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.TableColumnModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -129,6 +126,12 @@ public class View implements PropertyChangeListener {
                         Desktop.getDesktop().open(myFile);
                     }
                 }catch (Exception ex) {}
+            }
+        });
+        panel1.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                controller.actualizarProductos();
             }
         });
     }

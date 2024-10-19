@@ -193,8 +193,8 @@ public class Service {
 
 
     //================ LINEAS ================
-    public void create(Linea e) throws Exception {
-        lineasDao.create(e);
+    public Linea create(Linea e) throws Exception {
+       return lineasDao.create(e);
     }
 
     public Linea read(int id) throws Exception {
@@ -206,7 +206,7 @@ public class Service {
     }
 
     public void delete(Linea e) throws Exception {
-        lineasDao.delete(e);
+        lineasDao.delete(e.getNumero());
     }
 
     public List<Linea> search(Linea e) {
@@ -231,6 +231,7 @@ public class Service {
 
 
     //================ MÉTODOS DE CÁLCULO ================
+
     public double precioTotalPagar(Factura factura) throws Exception {
         return precioNetoPagarT(factura) - ahorroXDescuentoT(factura);
     }
@@ -264,6 +265,5 @@ public class Service {
     public float getVentas(Categoria c, int anio, int mes) throws Exception {
         return facturasDao.getVentas(c, anio, mes);
     }
-
 
 }

@@ -35,7 +35,7 @@ CREATE TABLE `cajero` (
 
 LOCK TABLES `cajero` WRITE;
 /*!40000 ALTER TABLE `cajero` DISABLE KEYS */;
-INSERT INTO `cajero` VALUES ('123','caml'),('23','fd'),('25','jk'),('286','prueba'),('3','d'),('33','ll'),('45','luka'),('456','gt'),('48','ju'),('52','ju'),('56','jk'),('57','ji'),('583','jk'),('59','ky'),('74','cam'),('84','nbv'),('85','fra'),('89','juk'),('897','hola'),('9624','p');
+INSERT INTO `cajero` VALUES ('123','caml'),('23','fd'),('25','jk'),('286','prueba'),('3','d'),('45','luka'),('456','gt'),('48','ju'),('52','ju'),('56','jk'),('57','ji'),('583','jk'),('59','ky'),('74','cam'),('84','nbv'),('85','fra'),('89','juk'),('897','hola'),('9624','p');
 /*!40000 ALTER TABLE `cajero` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -86,7 +86,7 @@ CREATE TABLE `cliente` (
 
 LOCK TABLES `cliente` WRITE;
 /*!40000 ALTER TABLE `cliente` DISABLE KEYS */;
-INSERT INTO `cliente` VALUES ('12','kj','65','hr',5),('23','gf','3','r',2);
+INSERT INTO `cliente` VALUES ('12','kj','65','hr',5),('23','gf','3','r',2),('569','Cam','8456','@gmail',2),('8962','fabr','789','jkl',0.8);
 /*!40000 ALTER TABLE `cliente` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -102,12 +102,15 @@ CREATE TABLE `factura` (
   `cliente` varchar(50) NOT NULL,
   `cajero` varchar(50) NOT NULL,
   `fecha` date NOT NULL,
+  `lineas` int DEFAULT NULL,
   PRIMARY KEY (`numero`),
   KEY `cliente` (`cliente`),
   KEY `cajero` (`cajero`),
+  KEY `lineas` (`lineas`),
   CONSTRAINT `factura_ibfk_1` FOREIGN KEY (`cliente`) REFERENCES `cliente` (`id`),
-  CONSTRAINT `factura_ibfk_2` FOREIGN KEY (`cajero`) REFERENCES `cajero` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `factura_ibfk_2` FOREIGN KEY (`cajero`) REFERENCES `cajero` (`id`),
+  CONSTRAINT `factura_ibfk_3` FOREIGN KEY (`lineas`) REFERENCES `linea` (`numero`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -116,7 +119,6 @@ CREATE TABLE `factura` (
 
 LOCK TABLES `factura` WRITE;
 /*!40000 ALTER TABLE `factura` DISABLE KEYS */;
-INSERT INTO `factura` VALUES (1,'23','45','2024-10-11');
 /*!40000 ALTER TABLE `factura` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -132,13 +134,13 @@ CREATE TABLE `linea` (
   `producto` varchar(50) NOT NULL,
   `factura` int NOT NULL,
   `cantidad` int NOT NULL,
-  `descuento` float unsigned zerofill DEFAULT '000000000000',
+  `descuento` float unsigned DEFAULT '0',
   PRIMARY KEY (`numero`),
-  KEY `linea_ibfk_1` (`factura`),
+  KEY `linea_ibfk_1` (`factura`) /*!80000 INVISIBLE */,
   KEY `linea_ibfk_2` (`producto`),
   CONSTRAINT `linea_ibfk_1` FOREIGN KEY (`factura`) REFERENCES `factura` (`numero`),
   CONSTRAINT `linea_ibfk_2` FOREIGN KEY (`producto`) REFERENCES `producto` (`codigo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -177,7 +179,7 @@ CREATE TABLE `producto` (
 
 LOCK TABLES `producto` WRITE;
 /*!40000 ALTER TABLE `producto` DISABLE KEYS */;
-INSERT INTO `producto` VALUES ('34','ju','tt','hl',7,58,'3'),('gvf','g','g','g',7,7,'2');
+INSERT INTO `producto` VALUES ('34','ju','tt','hl',7,50,'3'),('59','fresa','roja','un',7,7,'2'),('86','Mango','Naranja','kl',700,0,'1'),('gvf','g','g','g',7,7,'2');
 /*!40000 ALTER TABLE `producto` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -190,4 +192,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-17  9:09:02
+-- Dump completed on 2024-10-18 19:50:37

@@ -74,6 +74,7 @@ public class View implements PropertyChangeListener {
                     try {
                         controller.buscarProductoPorCodigo(productId);
                         controller.updateTotales();
+                        buscarProductoTxtField.setText("");//Limpiar
                     } catch (Exception ex) {
                         throw new RuntimeException("Error al agregar producto: " + ex.getMessage());
                     }
@@ -214,7 +215,12 @@ public class View implements PropertyChangeListener {
                 cancelar();
             }
         });
-
+        panel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                controller.actualizarComboBox();
+            }
+        });
 
     }
 
@@ -338,8 +344,7 @@ public class View implements PropertyChangeListener {
 
     public Factura take() {
         Factura factura = new Factura();
-
-        try {
+       try {
             // Obtiene el siguiente número de factura desde la base de datos
             int siguienteNumero = Service.instance().obtenerSiguienteNumeroFactura();
             factura.setNumero(siguienteNumero);
@@ -370,10 +375,6 @@ public class View implements PropertyChangeListener {
     }
 
 
-    private String generateFacturaNumber() {
-        String facturaNumber = "FAC-";
-        return (facturaNumber+((int) (Math.random() * 100000)));
-    }
 
     public class SearchDialog extends JDialog {
         private JLabel nombreLbl;
@@ -528,8 +529,6 @@ public class View implements PropertyChangeListener {
         }
     }
 
-
-
     public class CobroDialog extends JDialog {
 
         private JLabel efectivoLbl;
@@ -547,19 +546,19 @@ public class View implements PropertyChangeListener {
         public CobroDialog(Frame parent) {
             super(parent, "Pago", true);
             setLayout(new BorderLayout());
-            controller.updateTotales();
-            JPanel pagosRecibidos = new JPanel();
-            pagosRecibidos.setLayout(new GridLayout(4, 2, 2, 2));
+
+            // Panel para los pagos recibidos
+            JPanel pagosRecibidos = new JPanel(new GridLayout(4, 2, 5, 5));
             pagosRecibidos.setBorder(BorderFactory.createTitledBorder("Pagos recibidos"));
 
             efectivoLbl = new JLabel("Efectivo:");
-            efectivoTxtField = new JTextField(20);
+            efectivoTxtField = new JTextField(10);
             tarjetaLbl = new JLabel("Tarjeta:");
-            tarjetaTxtField = new JTextField(20);
+            tarjetaTxtField = new JTextField(10);
             chequeLbl = new JLabel("Cheque:");
-            chequeTxtField = new JTextField(20);
+            chequeTxtField = new JTextField(10);
             sinpeLbl = new JLabel("Sinpe:");
-            sinpeTxtField = new JTextField(20);
+            sinpeTxtField = new JTextField(10);
 
             pagosRecibidos.add(efectivoLbl);
             pagosRecibidos.add(efectivoTxtField);
@@ -569,28 +568,35 @@ public class View implements PropertyChangeListener {
             pagosRecibidos.add(chequeTxtField);
             pagosRecibidos.add(sinpeLbl);
             pagosRecibidos.add(sinpeTxtField);
+
+            // Panel para el importe a pagar
             JPanel importePanel = new JPanel();
+            importePanel.setLayout(new BorderLayout());
             importePanel.setBorder(BorderFactory.createTitledBorder("Importe a pagar"));
-            totalLbl = new JLabel(String.valueOf(model.current.precioTotalAPagar()));
-            totalLbl.setFont(new Font("Serif", Font.BOLD, 20));
+            importePanel.setPreferredSize(new Dimension(150, 70));
+
+            totalLbl = new JLabel(String.format("%.2f", model.current.precioTotalAPagar()), SwingConstants.CENTER);
+            totalLbl.setFont(new Font("Serif", Font.BOLD, 18)); // Ajusta el tamaño de la fuente si es necesario
             totalLbl.setForeground(Color.BLUE);
-            importePanel.add(totalLbl);
-            importePanel.setLayout(new GridLayout(1, 2, 1, 1));
-            JPanel buttonPanel = new JPanel();
+            importePanel.add(totalLbl, BorderLayout.CENTER);
+
+            // Panel principal para colocar los sub-paneles lado a lado
+            JPanel mainPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+            mainPanel.add(pagosRecibidos);
+            mainPanel.add(importePanel);
+
+            // Panel para los botones OK y Cancelar
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             okButton = new JButton("OK");
             cancelButton = new JButton("Cancelar");
             buttonPanel.add(okButton);
             buttonPanel.add(cancelButton);
 
-            JPanel mainPanel = new JPanel(new BorderLayout(1, 1));
-            mainPanel.add(pagosRecibidos, BorderLayout.CENTER);
-            mainPanel.add(importePanel, BorderLayout.   CENTER);
-            mainPanel.add(pagosRecibidos, BorderLayout.NORTH);
+            // Añadir los paneles principales al diálogo
             add(mainPanel, BorderLayout.CENTER);
             add(buttonPanel, BorderLayout.SOUTH);
 
-
-
+            // Configuración del botón OK
             okButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -604,7 +610,6 @@ public class View implements PropertyChangeListener {
                         double totalFactura = model.current.precioTotalAPagar();
 
                         if (totalPago >= totalFactura) {
-
                             cobrar();
                             dispose();
                         } else {
@@ -615,25 +620,25 @@ public class View implements PropertyChangeListener {
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(CobroDialog.this,
-                                "Ingrese un valor numerico válido.",
+                                "Ingrese un valor numérico válido.",
                                 "Error de entrada",
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
 
+            // Configuración del botón Cancelar
             cancelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     dispose();
                 }
             });
-            setSize(500, 300);
+
+            // Configuración de la ventana del diálogo
+            setSize(400, 250); // Ajusta el tamaño del diálogo
             setLocationRelativeTo(parent);
             setResizable(false);
         }
-
-
     }
-
 }

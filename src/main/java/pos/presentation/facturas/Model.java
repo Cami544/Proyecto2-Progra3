@@ -83,11 +83,13 @@ public class Model extends AbstractModel {
     public List<Cliente> getListClientes() {
         return listClientes;
     }
+    void setListClientes(List<Cliente> listClientes) { this.listClientes = listClientes; }
 
 
     public List<Cajero> getListCajeros() {
         return listCajeros;
     }
+    void setListCajeros(List<Cajero> listCajeros) { this.listCajeros = listCajeros; }
 
 
     // Constantes para las propiedades

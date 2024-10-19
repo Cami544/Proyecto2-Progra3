@@ -50,17 +50,33 @@ public class Controller {
     }
 
     public void saveLinea(Linea e) throws Exception {
+        Linea lineaGuardada;  // Variable para guardar la línea creada o actualizada
         switch (model.getMode()) {
             case Application.MODE_CREATE:
-                Service.instance().create(e);
+                // Capturar la línea devuelta por el servicio con el número asignado
+                lineaGuardada = Service.instance().create(e);
                 break;
             case Application.MODE_EDIT:
                 Service.instance().update(e);
+                lineaGuardada = e;  // En el modo de edición, no se requiere recapturar la línea
                 break;
+            default:
+                throw new IllegalStateException("Modo no reconocido: " + model.getMode());
+        }
+        List<Linea> lineas = model.getCurrent().getLineas();
+        if (model.getMode() == Application.MODE_CREATE) {
+            lineas.add(lineaGuardada);  // Agregar la línea recién creada a la lista
+            ((TableModel) view.getListLineas().getModel()).addLinea(lineaGuardada);
+        } else {
+            // Si es una actualización, deberías asegurarte de reflejar los cambios en la vista
+            int index = lineas.indexOf(e);
+            lineas.set(index, lineaGuardada);  // Actualizar la línea existente
+            ((TableModel) view.getListLineas().getModel()).updateLinea(index);
         }
         model.setFilter(new Factura());
         search(model.getFilter());
     }
+
 
     public void edit(int row) {
         if (row >= 0 && row < model.getList().size()) {
@@ -103,8 +119,8 @@ public class Controller {
 
             Factura facturaActual = model.getCurrent();
             List<Linea> lineas = facturaActual.getLineas();  // Mejor rendimiento
-
             boolean existeProd = false;
+
             for (int i = 0; i < lineas.size(); i++) {
                 Linea linea = lineas.get(i);
                 if (linea.getProducto().getId().equals(id)) {
@@ -113,6 +129,8 @@ public class Controller {
                     if (producto.getExistencias() >= cantNueva) {
                         linea.setCantidad(cantNueva);
                         ((TableModel) view.getListLineas().getModel()).updateLinea(i);
+                        // Disminuir existencias en la base de datos
+                        actualizarExistenciasProducto(producto, 1);  // Disminuir en 1
                         existeProd = true;
                     } else {
                         JOptionPane.showMessageDialog(view.getPanel(),
@@ -128,6 +146,8 @@ public class Controller {
                     Linea nuevaLinea = new Linea(numeroLinea, producto, facturaActual, 1, 0);  // El número de línea es un entero
                     lineas.add(nuevaLinea);
                     ((TableModel) view.getListLineas().getModel()).addLinea(nuevaLinea);
+                    // Disminuir existencias en la base de datos
+                    actualizarExistenciasProducto(producto, 1);
                 } else {
                     JOptionPane.showMessageDialog(view.getPanel(),
                             "No contamos con suficientes unidades de este producto: " + producto.getNombre(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -137,7 +157,44 @@ public class Controller {
             JOptionPane.showMessageDialog(view.getPanel(), "Error al buscar el producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    private void actualizarExistenciasProducto(Producto producto, int cantidadVendida) throws Exception {
+        int existenciasActuales = producto.getExistencias();
+        if (existenciasActuales >= cantidadVendida) {
+            producto.setExistencias(existenciasActuales - cantidadVendida);
 
+            // Actualizar el producto en la base de datos
+            Service.instance().update(producto);
+        } else {
+            throw new Exception("No hay suficientes unidades disponibles para este producto.");
+        }
+    }
+
+
+    public void actualizarComboBox() {
+        try {
+            // Obtener las listas desde la base de datos mediante el servicio
+
+
+            List<Cajero> cajeros = Service.instance().obtenerTodosCajeros();
+            List<Cliente> clientes = Service.instance().obtenerTodosClientes();
+
+            if (cajeros != null && clientes != null) {
+                // Actualizar el modelo con los datos obtenidos
+                model.setListCajeros(cajeros);
+                model.setListClientes(clientes);
+                // Actualizar los ComboBox en la vista
+                view.updateClientesComboBox(clientes);
+                view.updateCajerosComboBox(cajeros);
+
+                System.out.println("ComboBox actualizados correctamente.");
+            } else {
+                System.out.println("Error: Los cajeros o clientes son nulos.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error al actualizar los datos de los ComboBox: " + e.getMessage());
+        }
+    }
 
 
     public List<Producto> buscaProductoConNombre(String nombre) throws Exception {

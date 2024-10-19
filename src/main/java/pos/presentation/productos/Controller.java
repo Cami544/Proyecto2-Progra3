@@ -15,10 +15,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import pos.Application;
-import pos.logic.Cajero;
-import pos.logic.Categoria;
-import pos.logic.Producto;
-import pos.logic.Service;
+import pos.logic.*;
 
 import java.util.List;
 
@@ -33,7 +30,17 @@ public class Controller {
         view.setController(this);
         view.setModel(model);
     }
-
+    public void actualizarProductos() {
+        try {
+            List<Producto> productos= Service.instance().obtenerTodosProductos();
+            if (productos!= null) {
+                model.setList(productos); // Actualizar el modelo con los datos obtenidos
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error al actualizar los productos: " + e.getMessage());
+        }
+    }
     public void search(Producto filter) throws  Exception{
         model.setFilter(filter);
         model.setMode(Application.MODE_CREATE);
