@@ -32,7 +32,6 @@ public class Controller {
         updateFacturasTable();
     }
 
-
     public void search(Factura filter) throws  Exception{
         model.setFilter(filter);
         model.setMode(Application.MODE_CREATE);
@@ -75,30 +74,37 @@ public class Controller {
             TableColumnModel columnModel = view.listFacturas.getColumnModel();
             columnModel.getColumn(1).setPreferredWidth(150);
             columnModel.getColumn(4).setPreferredWidth(150);
-
+        System.out.println("Facturas Actualizadas");
     }
 
     public void updateLineasTable(Factura factura) {
-        List<Linea> lineas = factura.getLineas();
-        int[] cols = {
-                TableModelLineas.NUMERO,
-                TableModelLineas.ARTICULO,
-                TableModelLineas.CATEGORIA,
-                TableModelLineas.CANTIDAD,
-                TableModelLineas.PRECIO,
-                TableModelLineas.DESCUENTO,
-                TableModelLineas.NETO,
-                TableModelLineas.IMPORTE
-        };
+        if (factura != null && factura.getLineas() != null && !factura.getLineas().isEmpty()) {
+            List<Linea> lineas = factura.getLineas();
+            int[] cols = {
+                    TableModelLineas.NUMERO,
+                    TableModelLineas.ARTICULO,
+                    TableModelLineas.CATEGORIA,
+                    TableModelLineas.CANTIDAD,
+                    TableModelLineas.PRECIO,
+                    TableModelLineas.DESCUENTO,
+                    TableModelLineas.NETO,
+                    TableModelLineas.IMPORTE
+            };
 
-        TableModelLineas tableModelLineas = new TableModelLineas(cols, lineas);
-        view.listLineas.setModel(tableModelLineas);
-        view.listLineas.setRowHeight(30);
+            TableModelLineas tableModelLineas = new TableModelLineas(cols, lineas);
+            view.listLineas.setModel(tableModelLineas);
+            view.listLineas.setRowHeight(30);
 
-        TableColumnModel columnModel =  view.listLineas.getColumnModel();
-        columnModel.getColumn(1).setPreferredWidth(150);
-        columnModel.getColumn(4).setPreferredWidth(150);
+            TableColumnModel columnModel = view.listLineas.getColumnModel();
+            columnModel.getColumn(1).setPreferredWidth(150);
+            columnModel.getColumn(4).setPreferredWidth(150);
+
+            System.out.println("Líneas de la factura actualizadas.");
+        } else {
+            System.out.println("La factura no tiene líneas para mostrar.");
+        }
     }
+
 
     public <PdfFont> void print()throws Exception{
         String dest="historico.pdf";

@@ -1,10 +1,13 @@
 package pos.presentation.historico;
+
 import pos.logic.Cliente;
 import pos.logic.Factura;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -15,52 +18,60 @@ import javax.swing.event.ListSelectionListener;
 
 public class View implements PropertyChangeListener {
 
-        private JLabel BuscarNombreLbl;
-        private JTextField BuscarNombreTxtField;
-        private JButton report;
-        private JButton search;
-        JTable listFacturas;
-        private JPanel panel;
-        JTable listLineas;
+    private JLabel BuscarNombreLbl;
+    private JTextField BuscarNombreTxtField;
+    private JButton report;
+    private JButton search;
+    JTable listFacturas;
+    private JPanel panel;
+    JTable listLineas;
 
     Model model;
     Controller controller;
 
     public JPanel getPanel() {
 
-            return panel;
-        }
+        return panel;
+    }
 
-        public View() {
-            addTableSelectionListeners();
-            addSearchButtonListener();
+    public View() {
+        addTableSelectionListeners();
+        addSearchButtonListener();
 
-            search.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        Cliente filter = new Cliente();
-                        filter.setNombre(BuscarNombreTxtField.getText());
-                        controller.searchByClienteNombre(filter.getNombre());
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(panel, ex.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);
+        search.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Cliente filter = new Cliente();
+                    filter.setNombre(BuscarNombreTxtField.getText());
+                    controller.searchByClienteNombre(filter.getNombre());
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(panel, ex.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        report.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    controller.print();
+                    if (Desktop.isDesktopSupported()) {
+                        File myFile = new File("historico.pdf");
+                        Desktop.getDesktop().open(myFile);
                     }
+                } catch (Exception ex) {
                 }
-            });
+            }
+        });
+        panel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                controller.updateFacturasTable();
+            }
+        });
+    }
 
-            report.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        controller.print();
-                        if(Desktop.isDesktopSupported()) {
-                            File myFile = new File("historico.pdf");
-                            Desktop.getDesktop().open(myFile);
-                        }
-                    }catch (Exception ex) {}
-                }
-            });
-        }
     private void addSearchButtonListener() {
         search.addActionListener(new ActionListener() {
             @Override
@@ -74,6 +85,7 @@ public class View implements PropertyChangeListener {
             }
         });
     }
+
     private void addTableSelectionListeners() {
         listFacturas.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -82,7 +94,7 @@ public class View implements PropertyChangeListener {
                     int selectedRow = listFacturas.getSelectedRow();
                     if (selectedRow >= 0) {
                         Factura selectedFactura = model.getList().get(selectedRow);
-                       controller.updateLineasTable(selectedFactura);
+                        controller.updateLineasTable(selectedFactura);
                     }
                 }
             }
@@ -93,6 +105,12 @@ public class View implements PropertyChangeListener {
     public void setModel(Model model) {
         this.model = model;
         model.addPropertyChangeListener(this);
+        model.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals(Model.LIST)) {
+                // Actualiza la tabla cuando el modelo notifique un cambio en la lista
+                controller.updateFacturasTable();
+            }
+        });
     }
 
     public void setController(Controller controller) {
@@ -106,7 +124,7 @@ public class View implements PropertyChangeListener {
                 controller.updateFacturasTable();
                 break;
             case Model.FILTER:
-                if(model.getFilter().getCliente() != null) {
+                if (model.getFilter().getCliente() != null) {
                     BuscarNombreTxtField.setText(model.getFilter().getCliente().getNombre());
                 }
                 break;

@@ -166,6 +166,7 @@ public class LineaDao {
 
         Producto producto = new Producto();
         producto.setId(rs.getString("p.codigo"));
+        producto.setNombre(rs.getString("p.nombre"));
         producto.setDescripcion(rs.getString("p.descripcion"));
         producto.setUnidadMedida(rs.getString("p.unidadMedida"));
         producto.setPrecio(rs.getFloat("p.precioUnitario"));

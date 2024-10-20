@@ -23,7 +23,7 @@ public class TableModel extends AbstractTableModel<Factura> implements javax.swi
         switch (cols[col]) {
             case NUMERO: return e.getNumero();
             case NOMBRECliente: return e.getCliente().getNombre();
-            case NOMBRECAJERO: return e.getCajero().getNombre();
+            case NOMBRECAJERO: return e.getCajero().getNombre();//
             case FECHA: return e.getFecha();
             case IMPORTE: return e.precioTotalAPagar();
             default: return "";

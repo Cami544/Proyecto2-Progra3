@@ -15,7 +15,6 @@ public class FacturaDao {
         lineaDao = new LineaDao(); // Inicializa la instancia de LineaDao
     }
     // Método para crear una nueva factura
-
     public void create(Factura e) throws Exception {
         String insertFacturaSQL = "INSERT INTO factura (cliente, cajero, fecha) VALUES (?, ?, ?)";
         String insertLineaSQL = "INSERT INTO linea (producto, factura, cantidad, descuento) VALUES (?, ?, ?, ?)";
@@ -53,9 +52,9 @@ public class FacturaDao {
                 }
                 stmLinea.executeBatch();  // Ejecutar todas las inserciones en lote
             }
-            db.commit();  // Confirmar la transacción si todo salió bien
+            db.commit();  // Confirmar la transacción si todo salio bien
         } catch (SQLException ex) {
-            db.rollback();  // Revertir la transacción en caso de error
+            db.rollback();  // Revertir la transaccion en caso de error
             throw new Exception("Error al insertar la factura y sus líneas", ex);
         } finally {
             db.setAutoCommit(true);  // Restaurar auto-commit
@@ -224,6 +223,7 @@ public class FacturaDao {
 
     public List<Factura> obtenerFacturasDeCliente(Factura factura) throws Exception {
         List<Factura> filteredFacturas = new ArrayList<>();
+
         // Verificar que el cliente no es nulo y tiene un nombre
         if (factura.getCliente() == null || factura.getCliente().getNombre() == null) {
             throw new Exception("El cliente no puede ser nulo o no tener nombre.");
@@ -239,21 +239,24 @@ public class FacturaDao {
              ResultSet rs = stm.executeQuery()) {
 
             while (rs.next()) {
-                Factura fac = from(rs); // Metodo para construir la factura desde el ResultSet
+                Factura fac = from(rs); // Método para construir la factura desde el ResultSet
 
-                // Comprobar si el cliente de la factura coincide con el nombre del filtro
-                if (factura.getCliente() != null &&
-                        factura.getCliente().getNombre().toLowerCase().contains(nombreCliente)) {
-                    List<Linea> lineas = lineaDao.readByFactura(factura.getNumero()); // Obtener líneas por factura
-                    factura.setLineas(lineas); // Asumiendo que hay un metodo setLineas en la clase Factura
-                    filteredFacturas.add(factura); // Agregar factura filtrada a la lista
+                // Comprobar si el cliente de la factura obtenida coincide con el nombre del filtro
+                if (fac.getCliente() != null &&
+                        fac.getCliente().getNombre().toLowerCase().contains(nombreCliente)) {
+
+                    List<Linea> lineas = lineaDao.readByFactura(fac.getNumero()); // Obtener líneas por factura
+                    fac.setLineas(lineas); // Asignar las líneas a la factura obtenida
+                    filteredFacturas.add(fac); // Agregar la factura filtrada a la lista
                 }
             }
         } catch (SQLException ex) {
             throw new Exception("Error al buscar facturas por cliente", ex);
         }
+
         return filteredFacturas; // Devolver la lista de facturas filtradas
     }
+
 
     public float getVentas(Categoria c, int anio, int mes) throws Exception {
         float total = 0;
@@ -290,6 +293,7 @@ public class FacturaDao {
         factura.getCliente().setNombre(rs.getString("c.nombre")); // Nombre del cliente
         factura.setCajero(new Cajero());
         factura.getCajero().setId(rs.getString("ca.id")); // ID del cajero
+        factura.getCajero().setNombre(rs.getString("ca.nombre")); // ID del cajero
         factura.setFecha(rs.getDate("f.fecha").toLocalDate()); // Fecha de la factura
         return factura;
     }
