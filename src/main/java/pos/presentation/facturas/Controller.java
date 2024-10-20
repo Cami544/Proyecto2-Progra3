@@ -173,11 +173,8 @@ public class Controller {
     public void actualizarComboBox() {
         try {
             // Obtener las listas desde la base de datos mediante el servicio
-
-
             List<Cajero> cajeros = Service.instance().obtenerTodosCajeros();
             List<Cliente> clientes = Service.instance().obtenerTodosClientes();
-
             if (cajeros != null && clientes != null) {
                 // Actualizar el modelo con los datos obtenidos
                 model.setListCajeros(cajeros);

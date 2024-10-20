@@ -156,19 +156,17 @@ public class FacturaDao {
 
     public List<Factura> obtenerTodasFacturas() throws Exception {
         List<Factura> facturas = new ArrayList<>();
-
-        String sql = "SELECT f.numero, f.fecha, c.id AS id, c.nombre AS nombre, " +
-                "ca.id AS id, ca.nombre AS nombre, " +
-                "l.numero AS numero, l.cantidad, l.descuento, " +
-                "p.codigo AS codigo, p.nombre AS nombre, p.descripcion AS descripcion, p.unidadMedida, " +
-                "p.precioUnitario, p.existencias, " +
-                "cat.id AS id, cat.nombre AS nombre " +
+        String sql = "SELECT f.numero, f.fecha, c.id AS clienteId, c.nombre AS clienteNombre, " +
+                "ca.id AS cajeroId, ca.nombre AS cajeroNombre, " +
+                "l.numero AS lineaNumero, l.cantidad, l.descuento, " +
+                "p.codigo AS productoCodigo, p.nombre AS productoNombre, p.descripcion AS productoDescripcion, p.precioUnitario, " +
+                "cat.id AS categoriaId, cat.nombre AS categoriaNombre " +
                 "FROM factura f " +
                 "JOIN cliente c ON f.cliente = c.id " +
                 "JOIN cajero ca ON f.cajero = ca.id " +
-                "JOIN linea l ON f.numero = l.factura " +
-                "JOIN producto p ON l.producto = p.codigo " +
-                "JOIN categoria cat ON p.categoria = cat.id";
+                "LEFT JOIN linea l ON f.numero = l.factura " +
+                "LEFT JOIN producto p ON l.producto = p.codigo " +
+                "LEFT JOIN categoria cat ON p.categoria = cat.id" +  " ORDER BY f.numero ASC";
 
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             ResultSet rs = stm.executeQuery();
@@ -179,35 +177,47 @@ public class FacturaDao {
             while (rs.next()) {
                 int numeroFactura = rs.getInt("numero");
 
-                // Crear una nueva factura solo si el número ha cambiado
                 if (factura == null || numeroFactura != facturaNumeroAnterior) {
-                    factura = from(rs);  // Construir la factura desde el ResultSet
+                    factura = new Factura();
+                    factura.setNumero(numeroFactura);
+                    factura.setFecha(rs.getDate("fecha").toLocalDate());
+
+                    Cliente cliente = new Cliente();
+                    cliente.setId(rs.getString("clienteId"));
+                    cliente.setNombre(rs.getString("clienteNombre"));
+                    factura.setCliente(cliente);
+
+                    Cajero cajero = new Cajero();
+                    cajero.setId(rs.getString("cajeroId"));
+                    cajero.setNombre(rs.getString("cajeroNombre"));
+                    factura.setCajero(cajero);
                     facturas.add(factura);
                     facturaNumeroAnterior = numeroFactura;
                 }
+                // Si hay líneas asociadas a la factura, agrégalas
+                if (rs.getInt("lineaNumero") != 0) {
+                    Linea linea = new Linea();
+                    linea.setNumero(rs.getInt("lineaNumero"));
+                    linea.setCantidad(rs.getInt("cantidad"));
+                    linea.setDescuento(rs.getFloat("descuento"));
 
-                // Crear la línea y asociar el producto y la categoría
-                Linea linea = new Linea();
-                linea.setNumero(rs.getInt("numero"));
-                linea.setCantidad(rs.getInt("cantidad"));
-                linea.setDescuento(rs.getFloat("descuento"));
+                    Producto producto = new Producto();
+                    producto.setId(rs.getString("productoCodigo"));
+                    producto.setDescripcion(rs.getString("productoDescripcion"));
+                    producto.setPrecio(rs.getFloat("precioUnitario"));
+                    Categoria categoria = new Categoria();
+                    categoria.setIdCategoria(rs.getString("categoriaId"));
+                    categoria.setNombreCategoria(rs.getString("categoriaNombre"));
+                    producto.setCategoria(categoria);
 
-                Producto producto = new Producto();
-                producto.setId(rs.getString("codigo"));
-                producto.setDescripcion(rs.getString("descripcion"));
-                producto.setPrecio(rs.getFloat("precioUnitario"));
-
-                Categoria categoria = new Categoria();
-                categoria.setIdCategoria(rs.getString("id"));
-                categoria.setNombreCategoria(rs.getString("nombre"));
-
-                producto.setCategoria(categoria);
-                linea.setProducto(producto);
-                factura.getLineas().add(linea); // Añadir línea a la factura
+                    linea.setProducto(producto);
+                    factura.getLineas().add(linea);
+                }
             }
         }
         return facturas;
     }
+
 
     public int obtenerSiguienteNumeroFactura() throws Exception {
         String sql = "SELECT COALESCE(MAX(numero), 0) + 1 AS siguiente_numero FROM factura";

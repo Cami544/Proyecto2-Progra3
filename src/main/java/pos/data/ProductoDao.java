@@ -114,7 +114,7 @@ public class ProductoDao {
     }
     public List<Producto> ObtenerTodosProductos() throws Exception {
         List<Producto> productos = new ArrayList<>();
-        String sql = "SELECT p.*, c.id AS categoria FROM Producto p " +
+        String sql = "SELECT p.*, c.id AS categoria, c.nombre AS categoriaNombre FROM Producto p " +
                 "JOIN Categoria c ON p.categoria = c.id"; // Asegúrate de que el nombre de la columna sea correcto
 
         try (PreparedStatement stm = db.prepareStatement(sql);
@@ -159,6 +159,8 @@ public class ProductoDao {
         // Crear un objeto Categoria y establecer su id
         Categoria categoria = new Categoria();
         categoria.setIdCategoria(rs.getString(alias + ".categoria")); // Ajusta según el nombre de la columna en la tabla
+        categoria.setNombreCategoria(rs.getString("categoriaNombre")); // Nombre de la categoría (usamos el alias definido en el SELECT)
+
 
         e.setCategoria(categoria);
 

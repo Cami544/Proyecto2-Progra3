@@ -66,8 +66,13 @@ public class View implements PropertyChangeListener {
         });
         panel.addComponentListener(new ComponentAdapter() {
             @Override
-            public void componentShown(ComponentEvent e) {
-                controller.updateFacturasTable();
+                public void componentShown(ComponentEvent e) {
+                    controller.actualizarDatosFacturas();
+                try {
+                    controller.updateFacturasTable();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
@@ -108,7 +113,11 @@ public class View implements PropertyChangeListener {
         model.addPropertyChangeListener(evt -> {
             if (evt.getPropertyName().equals(Model.LIST)) {
                 // Actualiza la tabla cuando el modelo notifique un cambio en la lista
-                controller.updateFacturasTable();
+                try {
+                    controller.updateFacturasTable();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -121,7 +130,11 @@ public class View implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case Model.LIST:
-                controller.updateFacturasTable();
+                try {
+                    controller.updateFacturasTable();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             case Model.FILTER:
                 if (model.getFilter().getCliente() != null) {

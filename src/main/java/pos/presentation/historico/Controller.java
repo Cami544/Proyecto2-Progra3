@@ -16,7 +16,10 @@ import com.itextpdf.layout.properties.TextAlignment;
 import pos.Application;
 import pos.logic.*;
 
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Controller {
@@ -25,7 +28,7 @@ public class Controller {
     public Controller(View view, Model model) throws Exception {
         this.view = view;
         this.model = model;
-        List<Factura> facturas = Service.instance().search(new Factura());
+        List<Factura> facturas = Service.instance().obtenerTodasFacturas();
         model.init(facturas);
         view.setController(this);
         view.setModel(model);
@@ -56,25 +59,26 @@ public class Controller {
         model.setCurrent(new Factura());
     }
 
-    public void updateFacturasTable() {
+    public void updateFacturasTable() throws Exception {
         List<Factura> facturas = model.getList();
-
-            int[] cols = {
-                    TableModel.NUMERO,
-                    TableModel.NOMBRECliente,
-                    TableModel.NOMBRECAJERO,
-                    TableModel.FECHA,
-                    TableModel.IMPORTE
-            };
-
-            TableModel tableModel = new TableModel(cols, facturas);
-            view.listFacturas.setModel(tableModel);
-            view.listFacturas.setRowHeight(30);
-
-            TableColumnModel columnModel = view.listFacturas.getColumnModel();
-            columnModel.getColumn(1).setPreferredWidth(150);
-            columnModel.getColumn(4).setPreferredWidth(150);
-        System.out.println("Facturas Actualizadas");
+        if (facturas == null || facturas.isEmpty()) {
+            System.out.println("No hay facturas para mostrar.");
+            return;
+        }
+        int[] cols = {
+                TableModel.NUMERO,
+                TableModel.NOMBRECliente,
+                TableModel.NOMBRECAJERO,
+                TableModel.FECHA,
+                TableModel.IMPORTE
+        };
+        TableModel tableModel = new TableModel(cols, facturas);
+        view.listFacturas.setModel(tableModel);
+        view.listFacturas.setRowHeight(30);
+        TableColumnModel columnModel = view.listFacturas.getColumnModel();
+        columnModel.getColumn(1).setPreferredWidth(150);
+        columnModel.getColumn(4).setPreferredWidth(150);
+        System.out.println("Facturas actualizadas correctamente.");
     }
 
     public void updateLineasTable(Factura factura) {
@@ -90,7 +94,6 @@ public class Controller {
                     TableModelLineas.NETO,
                     TableModelLineas.IMPORTE
             };
-
             TableModelLineas tableModelLineas = new TableModelLineas(cols, lineas);
             view.listLineas.setModel(tableModelLineas);
             view.listLineas.setRowHeight(30);
@@ -104,6 +107,24 @@ public class Controller {
             System.out.println("La factura no tiene líneas para mostrar.");
         }
     }
+
+    public void actualizarDatosFacturas() {
+        try {
+            model.setList(Collections.emptyList());
+            List<Factura> facturas = new ArrayList<>(Service.instance().obtenerTodasFacturas());
+            if (facturas != null) {
+                model.setList(facturas);  // Sobreescribe la lista
+                System.out.println("Datos de facturas actualizados correctamente.");
+            } else {
+                System.out.println("Error: La lista de facturas es nula.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error al actualizar los datos de las facturas: " + e.getMessage());
+        }
+    }
+
+
 
 
     public <PdfFont> void print()throws Exception{

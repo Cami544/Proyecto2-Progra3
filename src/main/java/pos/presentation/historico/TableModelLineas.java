@@ -29,7 +29,7 @@ public class TableModelLineas extends AbstractTableModel<Linea> implements javax
             case ARTICULO:
                 return e.getProducto().getNombre();
             case CATEGORIA:
-                return e.getProducto().getCategoria();
+                return e.getProducto().getCategoria().getNombreCategoria();
             case CANTIDAD:
                 return e.getCantidad();
             case PRECIO:
