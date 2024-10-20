@@ -154,6 +154,7 @@ public class FacturaDao {
         return resultado;
     }
 
+    // Método para obtener todas las facturas
     public List<Factura> obtenerTodasFacturas() throws Exception {
         List<Factura> facturas = new ArrayList<>();
         String sql = "SELECT f.numero, f.fecha, c.id AS clienteId, c.nombre AS clienteNombre, " +
@@ -166,8 +167,8 @@ public class FacturaDao {
                 "JOIN cajero ca ON f.cajero = ca.id " +
                 "LEFT JOIN linea l ON f.numero = l.factura " +
                 "LEFT JOIN producto p ON l.producto = p.codigo " +
-                "LEFT JOIN categoria cat ON p.categoria = cat.id" +  " ORDER BY f.numero ASC";
-
+                "LEFT JOIN categoria cat ON p.categoria = cat.id " +
+                "ORDER BY f.numero ASC";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             ResultSet rs = stm.executeQuery();
 
@@ -177,47 +178,59 @@ public class FacturaDao {
             while (rs.next()) {
                 int numeroFactura = rs.getInt("numero");
 
+                // Si cambia el número de factura, crea una nueva factura
                 if (factura == null || numeroFactura != facturaNumeroAnterior) {
                     factura = new Factura();
                     factura.setNumero(numeroFactura);
-                    factura.setFecha(rs.getDate("fecha").toLocalDate());
+                    factura.setFecha(rs.getDate("fecha").toLocalDate()); // Asignando la fecha de la factura
 
+                    // Configuración del cliente
                     Cliente cliente = new Cliente();
-                    cliente.setId(rs.getString("clienteId"));
-                    cliente.setNombre(rs.getString("clienteNombre"));
+                    cliente.setId(rs.getString("clienteId")); // Usando alias clienteId
+                    cliente.setNombre(rs.getString("clienteNombre")); // Usando alias clienteNombre
                     factura.setCliente(cliente);
 
+                    // Configuración del cajero
                     Cajero cajero = new Cajero();
-                    cajero.setId(rs.getString("cajeroId"));
-                    cajero.setNombre(rs.getString("cajeroNombre"));
+                    cajero.setId(rs.getString("cajeroId")); // Usando alias cajeroId
+                    cajero.setNombre(rs.getString("cajeroNombre")); // Usando alias cajeroNombre
                     factura.setCajero(cajero);
+
+                    // Añadiendo la factura a la lista
                     facturas.add(factura);
                     facturaNumeroAnterior = numeroFactura;
                 }
+
                 // Si hay líneas asociadas a la factura, agrégalas
                 if (rs.getInt("lineaNumero") != 0) {
                     Linea linea = new Linea();
-                    linea.setNumero(rs.getInt("lineaNumero"));
-                    linea.setCantidad(rs.getInt("cantidad"));
-                    linea.setDescuento(rs.getFloat("descuento"));
+                    linea.setNumero(rs.getInt("lineaNumero")); // Asignando número de línea
+                    linea.setCantidad(rs.getInt("cantidad"));  // Asignando cantidad
+                    linea.setDescuento(rs.getFloat("descuento")); // Asignando descuento
 
+                    // Configuración del producto
                     Producto producto = new Producto();
-                    producto.setId(rs.getString("productoCodigo"));
-                    producto.setDescripcion(rs.getString("productoDescripcion"));
-                    producto.setPrecio(rs.getFloat("precioUnitario"));
+                    producto.setId(rs.getString("productoCodigo")); // Usando alias productoCodigo
+                    producto.setNombre(rs.getString("productoNombre")); // Usando alias productoNombre
+                    producto.setDescripcion(rs.getString("productoDescripcion")); // Usando alias productoDescripcion
+                    producto.setPrecio(rs.getFloat("precioUnitario")); // Usando alias precioUnitario
+
+                    // Configuración de la categoría del producto
                     Categoria categoria = new Categoria();
-                    categoria.setIdCategoria(rs.getString("categoriaId"));
-                    categoria.setNombreCategoria(rs.getString("categoriaNombre"));
+                    categoria.setIdCategoria(rs.getString("categoriaId")); // Usando alias categoriaId
+                    categoria.setNombreCategoria(rs.getString("categoriaNombre")); // Usando alias categoriaNombre
                     producto.setCategoria(categoria);
 
+                    // Añadiendo el producto a la línea
                     linea.setProducto(producto);
+
+                    // Añadiendo la línea a la factura
                     factura.getLineas().add(linea);
                 }
             }
         }
         return facturas;
     }
-
 
     public int obtenerSiguienteNumeroFactura() throws Exception {
         String sql = "SELECT COALESCE(MAX(numero), 0) + 1 AS siguiente_numero FROM factura";
@@ -295,16 +308,31 @@ public class FacturaDao {
         return total;
     }
 
-    public Factura from(ResultSet rs) throws Exception {
+   /* public Factura from(ResultSet rs) throws Exception {
         Factura factura = new Factura();
         factura.setNumero(rs.getInt("f.numero")); // Número de la factura
         factura.setCliente(new Cliente());
         factura.getCliente().setId(rs.getString("c.id")); // ID del cliente
         factura.getCliente().setNombre(rs.getString("c.nombre")); // Nombre del cliente
         factura.setCajero(new Cajero());
-        factura.getCajero().setId(rs.getString("ca.id")); // ID del cajero
-        factura.getCajero().setNombre(rs.getString("ca.nombre")); // ID del cajero
+        factura.getCajero().setId(rs.getString(".categoriaId")); // ID del cajero
+        factura.getCajero().setNombre(rs.getString(".categoriaNombre")); // ID del cajero
         factura.setFecha(rs.getDate("f.fecha").toLocalDate()); // Fecha de la factura
         return factura;
-    }
+    }*/
+// Método para mapear una factura desde el ResultSet
+   public Factura from(ResultSet rs) throws Exception {
+       Factura factura = new Factura();
+       factura.setNumero(rs.getInt("numero"));
+       Cliente cliente = new Cliente();
+       cliente.setId(rs.getString("clienteId"));  // Usando alias clienteId de la consulta SQL
+       cliente.setNombre(rs.getString("clienteNombre")); // Usando alias clienteNombre de la consulta SQL
+       factura.setCliente(cliente);
+       Cajero cajero = new Cajero();
+       cajero.setId(rs.getString("cajeroId"));  // Usando alias cajeroId de la consulta SQL
+       cajero.setNombre(rs.getString("cajeroNombre")); // Usando alias cajeroNombre de la consulta SQL
+       factura.setCajero(cajero);
+       factura.setFecha(rs.getDate("fecha").toLocalDate()); // Usando alias fecha de la consulta SQL
+       return factura;
+   }
 }
