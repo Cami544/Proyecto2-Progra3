@@ -90,6 +90,7 @@ public class Controller {
         }
     }
 
+
     public void agregarLineaACategoria(String categoria, Float[] datos) throws Exception {
         if (categoria != null && datos != null) {
             int index = model.getRows().indexOf(categoria);

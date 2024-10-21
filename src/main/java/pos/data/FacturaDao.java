@@ -279,14 +279,15 @@ public class FacturaDao {
 
         return filteredFacturas; // Devolver la lista de facturas filtradas
     }
+
     public float getVentas(Categoria c, int anio, int mes) throws Exception {
         float total = 0;
 
-        // Consulta SQL para recuperar los IDs de las facturas filtradas
-        String sql = "SELECT DISTINCT f.id " +
+        // Consulta SQL corregida para recuperar los IDs de las facturas filtradas
+        String sql = "SELECT DISTINCT f.numero " +
                 "FROM Factura f " +
-                "JOIN Linea l ON f.id = l.factura " +
-                "JOIN Producto p ON l.producto = p.id " +
+                "JOIN Linea l ON f.numero = l.factura " +  // Cambio de f.id a f.numero
+                "JOIN Producto p ON l.producto = p.codigo " +
                 "JOIN Categoria ca ON p.categoria = ca.id " +
                 "WHERE ca.id = ? AND " +
                 "YEAR(f.fecha) = ? AND MONTH(f.fecha) = ?";
@@ -298,7 +299,7 @@ public class FacturaDao {
 
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
-                    int facturaId = rs.getInt("id");  // ID de la factura
+                    int facturaId = rs.getInt("numero");  // ID de la factura
                     Factura factura = this.read(facturaId);  // Recuperar la factura completa
 
                     // Asegúrate de que la factura y sus líneas estén correctamente cargadas
@@ -308,11 +309,11 @@ public class FacturaDao {
                 }
             }
         } catch (SQLException ex) {
-            throw new Exception("Error al obtener las ventas", ex);
+            throw new Exception("Error al obtener las ventas para la categoría: " + c.getIdCategoria() + " en " + anio + "/" + mes, ex);
         }
-
         return total;
     }
+
 
 
     /* public Factura from(ResultSet rs) throws Exception {
