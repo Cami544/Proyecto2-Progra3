@@ -279,26 +279,32 @@ public class FacturaDao {
 
         return filteredFacturas; // Devolver la lista de facturas filtradas
     }
-
-
     public float getVentas(Categoria c, int anio, int mes) throws Exception {
         float total = 0;
-        String sql = "SELECT SUM(l.total) AS total_ventas " +
+
+        // Consulta SQL para recuperar los IDs de las facturas filtradas
+        String sql = "SELECT DISTINCT f.id " +
                 "FROM Factura f " +
                 "JOIN Linea l ON f.id = l.factura " +
-                "JOIN Producto p ON l.producto = p.id " +  // Relacionar Linea con Producto
-                "JOIN Categoria ca ON p.categoria = ca.id " + // Relacionar Producto con Categoria
-                "WHERE ca.id = ? AND " +  // Filtrar por la categoría
+                "JOIN Producto p ON l.producto = p.id " +
+                "JOIN Categoria ca ON p.categoria = ca.id " +
+                "WHERE ca.id = ? AND " +
                 "YEAR(f.fecha) = ? AND MONTH(f.fecha) = ?";
 
         try (PreparedStatement stm = db.prepareStatement(sql)) {
-            stm.setString(1, c.getIdCategoria()); // Establecer el ID de la categoría
-            stm.setInt(2, anio);                  // Establecer el año
-            stm.setInt(3, mes);                   // Establecer el mes
+            stm.setString(1, c.getIdCategoria());  // ID de la categoría
+            stm.setInt(2, anio);                   // Año
+            stm.setInt(3, mes);                    // Mes
 
             try (ResultSet rs = stm.executeQuery()) {
-                if (rs.next()) {
-                    total = rs.getFloat("total_ventas"); // Obtener el total de ventas
+                while (rs.next()) {
+                    int facturaId = rs.getInt("id");  // ID de la factura
+                    Factura factura = this.read(facturaId);  // Recuperar la factura completa
+
+                    // Asegúrate de que la factura y sus líneas estén correctamente cargadas
+                    if (factura != null) {
+                        total += Service.instance().precioTotalPagar(factura);  // Sumar total con descuento
+                    }
                 }
             }
         } catch (SQLException ex) {
@@ -308,7 +314,8 @@ public class FacturaDao {
         return total;
     }
 
-   /* public Factura from(ResultSet rs) throws Exception {
+
+    /* public Factura from(ResultSet rs) throws Exception {
         Factura factura = new Factura();
         factura.setNumero(rs.getInt("f.numero")); // Número de la factura
         factura.setCliente(new Cliente());
