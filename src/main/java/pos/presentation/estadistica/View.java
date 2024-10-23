@@ -37,6 +37,12 @@ public class View implements PropertyChangeListener {
     private Model model;
     private Controller controller;
 
+    // Variables para almacenar el último rango seleccionado
+    private Integer lastAnioDesde = 0; // O null, dependiendo de tu lógica
+    private Integer lastAnioHasta = 0; // O null
+    private Integer lastMesDesde = 0; // O null
+    private Integer lastMesHasta = 0; // O null
+
     public JPanel getPanel() {
         return panel;
     }
@@ -90,20 +96,46 @@ public class View implements PropertyChangeListener {
             public void actionPerformed(ActionEvent e) {
                 if (validar()) {
                     try {
-                        controller.actualizarRangos(
-                                Integer.parseInt((String) AnioDesde.getSelectedItem()),
-                                mesDesde.getSelectedIndex() + 1,
-                                Integer.parseInt((String) AnioHasta.getSelectedItem()),
-                                mesHasta.getSelectedIndex() + 1
+                        // Obtener el año como String y convertir a Integer
+                        String anioDesdeStr = (String) AnioDesde.getSelectedItem();
+                        String anioHastaStr = (String) AnioHasta.getSelectedItem();
 
-                        );
+                        // Convertir a Integer, asegurándote de que son números válidos
+                        int anioDesde = Integer.parseInt(anioDesdeStr);
+                        int anioHasta = Integer.parseInt(anioHastaStr);
+
+                        int mesDesdeIndex = mesDesde.getSelectedIndex() + 1;
+                        int mesHastaIndex = mesHasta.getSelectedIndex() + 1;
+
+                        // Inicializar lastAnioDesde y otros si son nulos
+                        if (lastAnioDesde == null || lastAnioHasta == null ||
+                                lastMesDesde == null || lastMesHasta == null) {
+                            lastAnioDesde = anioDesde;
+                            lastAnioHasta = anioHasta;
+                            lastMesDesde = mesDesdeIndex;
+                            lastMesHasta = mesHastaIndex;
+
+                            controller.actualizarRangos(anioDesde, mesDesdeIndex, anioHasta, mesHastaIndex);
+                        } else if (anioDesde != lastAnioDesde || anioHasta != lastAnioHasta ||
+                                mesDesdeIndex != lastMesDesde || mesHastaIndex != lastMesHasta) {
+                            // Solo actualizar si hay un cambio en los rangos
+                            lastAnioDesde = anioDesde;
+                            lastAnioHasta = anioHasta;
+                            lastMesDesde = mesDesdeIndex;
+                            lastMesHasta = mesHastaIndex;
+
+                            controller.actualizarRangos(anioDesde, mesDesdeIndex, anioHasta, mesHastaIndex);
+                        }
+                    } catch (NumberFormatException ex) {
+                        // Manejo de errores si la conversión falla
+                        JOptionPane.showMessageDialog(null, "Error al convertir el año: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
-
                 }
             }
         };
+
 
         mesDesde.addActionListener(comboBoxActionListener);
         mesHasta.addActionListener(comboBoxActionListener);

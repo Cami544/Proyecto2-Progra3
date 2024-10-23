@@ -282,17 +282,15 @@ public class FacturaDao {
 
         return filteredFacturas;
     }
-
     public float getVentas(Categoria c, int anio, int mes) throws Exception {
         float total = 0;
 
-        // Consulta SQL para recuperar los IDs de las facturas filtradas
-        String sql = "SELECT DISTINCT f.numero, c.id AS clienteId, c.nombre AS clienteNombre " +
+        // Nueva consulta SQL que suma directamente el precio total basado en cantidad y precio del producto
+        String sql = "SELECT SUM(l.cantidad * p.precioUnitario) AS totalVentas " +
                 "FROM Factura f " +
                 "JOIN Linea l ON f.numero = l.factura " +
                 "JOIN Producto p ON l.producto = p.codigo " +
                 "JOIN Categoria ca ON p.categoria = ca.id " +
-                "JOIN Cliente c ON f.cliente = c.id " +  // Asegúrate de incluir la unión con Cliente
                 "WHERE ca.id = ? AND " +
                 "YEAR(f.fecha) = ? AND MONTH(f.fecha) = ?";
 
@@ -303,29 +301,9 @@ public class FacturaDao {
             stm.setInt(3, mes);                    // Mes
 
             try (ResultSet rs = stm.executeQuery()) {
-                while (rs.next()) {
-                    int facturaId = rs.getInt("numero");  // ID de la factura
-
-                    // Debug: Imprime el ID de la factura para verificar que no es nulo o incorrecto
-                    System.out.println("Factura encontrada: " + facturaId);
-
-                    Factura factura = this.read(facturaId);  // Recuperar la factura completa
-
-                    // Verificar que la factura no sea nula antes de usarla
-                    if (factura != null) {
-                        try {
-                            // Calcular el precio total con descuento
-                            float precio = (float) Service.instance().precioTotalPagar(factura);
-                            total += precio;  // Sumar al total
-                        } catch (Exception e) {
-                            // Captura y maneja cualquier error en el cálculo del precio total
-                            System.err.println("Error al calcular el precio para la factura ID: " + facturaId);
-                            e.printStackTrace();
-                        }
-                    } else {
-                        // Mensaje de error si la factura no se encuentra o es nula
-                        System.err.println("Factura no encontrada o nula para ID: " + facturaId);
-                    }
+                if (rs.next()) {
+                    // Obtener el total de ventas calculado por la base de datos
+                    total = rs.getFloat("totalVentas");
                 }
             }
         } catch (SQLException ex) {
@@ -337,7 +315,6 @@ public class FacturaDao {
 
         return total;
     }
-
 
 
     // Método para mapear una factura desde el ResultSet
