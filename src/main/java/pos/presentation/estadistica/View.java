@@ -49,10 +49,11 @@ public class View implements PropertyChangeListener {
                 try {
                     controller.agregarTodasLasCategorias();
                 } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+                    JOptionPane.showMessageDialog(null, "Error al agregar categorías: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();  // Para obtener detalles del stacktrace completo
+
                 }
             }
-
     });
 
         borrar1.addActionListener(new ActionListener() {
@@ -117,9 +118,8 @@ public class View implements PropertyChangeListener {
                 try {
                     controller.agregarCategoria(c);
                 } catch (Exception ex) {
-
+                    throw new RuntimeException(ex);
                 }
-
             }
         });
     }
@@ -186,6 +186,7 @@ public class View implements PropertyChangeListener {
         switch (evt.getPropertyName()) {
             case Model.CATEGORIES_ALL:
 
+                categoriaComboBox.removeAllItems();
                 for(Categoria categoria : model.getCategoriasAll()) {
                     categoriaComboBox.addItem(categoria);
                 }

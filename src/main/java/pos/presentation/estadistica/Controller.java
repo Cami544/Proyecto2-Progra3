@@ -14,25 +14,35 @@ public class Controller {
     private View view;
     private Model model;
 
-
     public Controller(View view, Model model) throws Exception {
         this.view = view;
         this.model = model;
         model.init(new ArrayList<Categoria>(Service.instance().obtenerTodasCategorias()));
         view.setController(this);
         view.setModel(model);
+
+        // Ahora que el modelo ha sido asignado, llama a fillCategoriaComboBox
+        try {
+            view.fillCategoriaComboBox();//Si se esta haciendo
+        } catch (Exception e) {
+            System.err.println("Error al llenar el ComboBox de categorías: " + e.getMessage());
+        }
     }
 
     public void agregarCategoria(Categoria nuevaCategoria) throws Exception {
-
-        if (model.getCategorias().contains(nuevaCategoria)) {throw new Exception();}
-        try {
+        // Limpia las categorías actuales antes de agregar una nueva
+        model.getCategorias().clear();
+        // Asegúrate de que la nueva categoría no sea nula o ya existente
+        if (nuevaCategoria != null && !model.getCategorias().contains(nuevaCategoria)) {
             model.getCategorias().add(nuevaCategoria);
             actualizarDatos();
-        }catch(Exception e) {
-            System.err.println("Categoria ya en la lista: " + e.getMessage());
+            // Notificar a la vista que las categorías han cambiado
+            model.firePropertyChange(CATEGORIES_ALL);
+        } else {
+            throw new Exception("Categoría inválida o ya existente");
         }
     }
+
 
     public void agregarTodasLasCategorias() {
         try {
@@ -44,13 +54,12 @@ public class Controller {
             }
             actualizarDatos();
         } catch (Exception e) {
-            System.err.println("Error al agregar todas las categorías: " + e.getMessage());
+            System.err.println("Error al agregar todas las categoríasController: " + e.getMessage());
+            e.printStackTrace();  // Para obtener detalles del stacktrace completo
         }
     }
 
-    public void botonAgregarCategoriaActionPerformed(Categoria nuevaCategoria) {
-
-    }
+    /*public void botonAgregarCategoriaActionPerformed(Categoria nuevaCategoria) {}*/
 
     public void clear() throws Exception {
         model.getCategorias().clear();
@@ -86,7 +95,7 @@ public class Controller {
             }
             view.getPanel().revalidate();
         } else {
-            System.out.println("No hay categorías disponibles");
+            System.err.println("El ComboBox de categorías no está inicializado correctamente.");
         }
     }
 
@@ -114,7 +123,6 @@ public class Controller {
         actualizarDatos();
     }
 
-
     public void actualizarDatos() throws Exception {
 
         Rango r = model.getRango();
@@ -126,6 +134,10 @@ public class Controller {
 
         int year = r.getAnnosDesde();
         int month = r.getMesDesde();
+
+        // Depuración: Verificamos el rango de fechas calculado
+        System.out.println("Procesando datos para el rango desde " + r.getAnnosDesde() + "/" + r.getMesDesde() +
+                " hasta " + r.getAnnosHasta() + "/" + r.getMesHasta());
 
         for (int i = 0; i < colCount; i++) {
             cols[i] = year + "-" + (month < 10 ? "0" + month : month);
@@ -139,15 +151,23 @@ public class Controller {
         Float[][] data = new Float[rowCount][colCount];
 
         if(!model.getCategorias().isEmpty()) {
-
             for (int i = 0; i < rowCount; i++) {
                 Categoria categoria = model.getCategorias().get(i);
+                System.out.println("Procesando categoría: " + categoria.getNombreCategoria());
                 year = r.getAnnosDesde();
                 month = r.getMesDesde();
 
                 for (int j = 0; j < colCount; j++) {
-                    Float ventas = Service.instance().getVentas(categoria, year, month);
-                    data[i][j] = ventas;
+                    try {
+                        Float ventas = Service.instance().getVentas(categoria, year, month);
+                        System.out.println("Ventas: " + ventas + " para categoría " + categoria.getNombreCategoria());
+                        data[i][j] = ventas;
+                    } catch (Exception e) {
+                        // 4. Captura de errores al obtener ventas para una categoría específica
+                        System.err.println("Error al obtener ventas para la categoría " + categoria.getNombreCategoria() + ": " + e.getMessage());
+                        e.printStackTrace();
+                        data[i][j] = 0.0f; // Establecemos 0.0 como valor por defecto en caso de error
+                    }
 
                     month++;
                     if (month > 12) {
@@ -156,11 +176,9 @@ public class Controller {
                     }
                 }
             }
-
             int i = 0;
 
             for (Categoria c : model.getCategorias()) {
-
                 rows[i] = c.getNombreCategoria();
                 i++;
             }
@@ -172,5 +190,6 @@ public class Controller {
             return;
         }
     }
+
 
 }

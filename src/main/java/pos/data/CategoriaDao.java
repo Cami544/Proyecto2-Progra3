@@ -38,26 +38,24 @@ public class CategoriaDao {
         e.setNombreCategoria(rs.getString(alias + ".nombre"));
         return e;
     }
+
     public List<Categoria> obtenerTodasCategorias() throws Exception {
         List<Categoria> categorias = new ArrayList<>();
         String sql = "SELECT * FROM Categoria";
 
         try (PreparedStatement stm = db.prepareStatement(sql);
-             ResultSet rs = stm.executeQuery()) {
 
+             ResultSet rs = stm.executeQuery()) {
             while (rs.next()) {
                 Categoria categoria = new Categoria();
-                categoria.setIdCategoria(String.valueOf(rs.getInt("id"))); // Ajusta el nombre de la columna
+                categoria.setIdCategoria(rs.getString("id"));
                 categoria.setNombreCategoria(rs.getString("nombre"));
-
-                categorias.add(categoria); // Agregar la categoría a la lista
+                categorias.add(categoria);
             }
         } catch (SQLException ex) {
             throw new Exception("Error al obtener todas las categorías", ex);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
-
-        return categorias; // Devolver la lista de categorías
+        return categorias;
     }
+
 }

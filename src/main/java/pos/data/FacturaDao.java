@@ -102,6 +102,9 @@ public class FacturaDao {
         } catch (SQLException ex) {
             throw new Exception("Error al actualizar la factura", ex);
         }
+        finally {
+            db.setAutoCommit(true); // Restaurar auto-commit
+        }
     }
 
     public void delete(Factura e) throws Exception {
@@ -169,6 +172,7 @@ public class FacturaDao {
                 "LEFT JOIN producto p ON l.producto = p.codigo " +
                 "LEFT JOIN categoria cat ON p.categoria = cat.id " +
                 "ORDER BY f.numero ASC";
+
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             ResultSet rs = stm.executeQuery();
 
@@ -247,14 +251,14 @@ public class FacturaDao {
     public List<Factura> obtenerFacturasDeCliente(Factura factura) throws Exception {
         List<Factura> filteredFacturas = new ArrayList<>();
 
-        // Verificar que el cliente no es nulo y tiene un nombre
         if (factura.getCliente() == null || factura.getCliente().getNombre() == null) {
             throw new Exception("El cliente no puede ser nulo o no tener nombre.");
         }
-        String nombreCliente = factura.getCliente().getNombre().toLowerCase(); // Convertir a minúsculas para búsqueda insensible
+        String nombreCliente = factura.getCliente().getNombre().toLowerCase();
 
-        // Consulta SQL para obtener todas las facturas
-        String sql = "SELECT f.*, ca.*, c.* FROM Factura f " +
+        String sql = "SELECT f.numero, c.id AS clienteId, c.nombre AS clienteNombre, " +
+                "ca.id AS cajeroId, ca.nombre AS cajeroNombre, f.fecha " +
+                "FROM Factura f " +
                 "INNER JOIN Cajero ca ON f.cajero = ca.id " +
                 "INNER JOIN Cliente c ON f.cliente = c.id";
 
@@ -262,35 +266,36 @@ public class FacturaDao {
              ResultSet rs = stm.executeQuery()) {
 
             while (rs.next()) {
-                Factura fac = from(rs); // Método para construir la factura desde el ResultSet
+                Factura fac = from(rs);
 
-                // Comprobar si el cliente de la factura obtenida coincide con el nombre del filtro
-                if (fac.getCliente() != null &&
+                if (fac.getCliente() != null && fac.getCliente().getNombre() != null &&
                         fac.getCliente().getNombre().toLowerCase().contains(nombreCliente)) {
 
-                    List<Linea> lineas = lineaDao.readByFactura(fac.getNumero()); // Obtener líneas por factura
-                    fac.setLineas(lineas); // Asignar las líneas a la factura obtenida
-                    filteredFacturas.add(fac); // Agregar la factura filtrada a la lista
+                    List<Linea> lineas = lineaDao.readByFactura(fac.getNumero());
+                    fac.setLineas(lineas);
+                    filteredFacturas.add(fac);
                 }
             }
         } catch (SQLException ex) {
-            throw new Exception("Error al buscar facturas por cliente", ex);
+            throw new Exception("Error al buscar facturas por cliente: " + ex.getMessage(), ex);
         }
 
-        return filteredFacturas; // Devolver la lista de facturas filtradas
+        return filteredFacturas;
     }
 
     public float getVentas(Categoria c, int anio, int mes) throws Exception {
         float total = 0;
 
-        // Consulta SQL corregida para recuperar los IDs de las facturas filtradas
-        String sql = "SELECT DISTINCT f.numero " +
+        // Consulta SQL para recuperar los IDs de las facturas filtradas
+        String sql = "SELECT DISTINCT f.numero, c.id AS clienteId, c.nombre AS clienteNombre " +
                 "FROM Factura f " +
-                "JOIN Linea l ON f.numero = l.factura " +  // Cambio de f.id a f.numero
+                "JOIN Linea l ON f.numero = l.factura " +
                 "JOIN Producto p ON l.producto = p.codigo " +
                 "JOIN Categoria ca ON p.categoria = ca.id " +
+                "JOIN Cliente c ON f.cliente = c.id " +  // Asegúrate de incluir la unión con Cliente
                 "WHERE ca.id = ? AND " +
                 "YEAR(f.fecha) = ? AND MONTH(f.fecha) = ?";
+
 
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             stm.setString(1, c.getIdCategoria());  // ID de la categoría
@@ -300,35 +305,42 @@ public class FacturaDao {
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     int facturaId = rs.getInt("numero");  // ID de la factura
+
+                    // Debug: Imprime el ID de la factura para verificar que no es nulo o incorrecto
+                    System.out.println("Factura encontrada: " + facturaId);
+
                     Factura factura = this.read(facturaId);  // Recuperar la factura completa
 
-                    // Asegúrate de que la factura y sus líneas estén correctamente cargadas
+                    // Verificar que la factura no sea nula antes de usarla
                     if (factura != null) {
-                        total += Service.instance().precioTotalPagar(factura);  // Sumar total con descuento
+                        try {
+                            // Calcular el precio total con descuento
+                            float precio = (float) Service.instance().precioTotalPagar(factura);
+                            total += precio;  // Sumar al total
+                        } catch (Exception e) {
+                            // Captura y maneja cualquier error en el cálculo del precio total
+                            System.err.println("Error al calcular el precio para la factura ID: " + facturaId);
+                            e.printStackTrace();
+                        }
+                    } else {
+                        // Mensaje de error si la factura no se encuentra o es nula
+                        System.err.println("Factura no encontrada o nula para ID: " + facturaId);
                     }
                 }
             }
         } catch (SQLException ex) {
             throw new Exception("Error al obtener las ventas para la categoría: " + c.getIdCategoria() + " en " + anio + "/" + mes, ex);
         }
+
+        // Debug: Imprimir el total de ventas calculado
+        System.out.println("Total de ventas para la categoría " + c.getIdCategoria() + " en " + anio + "/" + mes + ": " + total);
+
         return total;
     }
 
 
 
-    /* public Factura from(ResultSet rs) throws Exception {
-        Factura factura = new Factura();
-        factura.setNumero(rs.getInt("f.numero")); // Número de la factura
-        factura.setCliente(new Cliente());
-        factura.getCliente().setId(rs.getString("c.id")); // ID del cliente
-        factura.getCliente().setNombre(rs.getString("c.nombre")); // Nombre del cliente
-        factura.setCajero(new Cajero());
-        factura.getCajero().setId(rs.getString(".categoriaId")); // ID del cajero
-        factura.getCajero().setNombre(rs.getString(".categoriaNombre")); // ID del cajero
-        factura.setFecha(rs.getDate("f.fecha").toLocalDate()); // Fecha de la factura
-        return factura;
-    }*/
-// Método para mapear una factura desde el ResultSet
+    // Método para mapear una factura desde el ResultSet
    public Factura from(ResultSet rs) throws Exception {
        Factura factura = new Factura();
        factura.setNumero(rs.getInt("numero"));
